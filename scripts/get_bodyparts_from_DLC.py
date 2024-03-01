@@ -23,13 +23,10 @@ def rewrite_dataframe(csv_file_path, df_cols = dlc_petridish_layout):
     This func returns a pandas Dataframe, 
     with an easy to work column layout.
     """
-    df = pd.read_csv(csv_file_path)
-    df = df.iloc[4:]
-    new_df = pd.DataFrame(columns = dlc_petridish_layout)
-    print(new_df)
-    new_df.concatinate(df)
-    print(new_df)
-    return new_df
+    df = pd.read_csv(csv_file_path,names=df_cols)
+    df = df.iloc[3:]
+    print(df)
+    return df
     
     
     
