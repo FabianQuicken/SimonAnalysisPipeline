@@ -15,14 +15,11 @@ def likelihood_filtering(df, likelihood_row_name = "likelihood", filter_val = 0.
     each bodypart in each frame to be correct. Filtering predictions
     for the likelihood, reduces false predictions in the dataset.
     """
-    df_filtered = df[df[likelihood_row_name] > 0.95]
-    df_removed_rows = df[df[likelihood_row_name] < 0.95]
+    df_filtered = df[df[likelihood_row_name] > filter_val]
+    df_removed_rows = df[df[likelihood_row_name] < filter_val]
     print(f"The filter removed {len(df_removed_rows)} rows of a total of {len(df)} rows.")
     return df_filtered
     
 
-df1 = pd.DataFrame({"likelihood":[0.99,0.98,0.93,0.94,0.96,0.95]})
-df1_filtered = likelihood_filtering(df=df1)
-print(df1)
-print(df1_filtered)
+
                    
