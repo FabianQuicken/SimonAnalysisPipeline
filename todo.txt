@@ -1,0 +1,2 @@
+Ich sollte die float konvertierung vermutlich in die rewrite dataframe function einbauen
+außerdem sollte ich die geänderten dlc csv dataaframes auch irgendwo speichern -->das sollte die nächste funktion werden
