@@ -22,9 +22,12 @@ def rewrite_dataframe(csv_file_path, df_cols = dlc_petridish_layout):
     """
     This func returns a pandas Dataframe, 
     with an easy to work column layout.
+    The information gets changed into floats, because DLC saves it in csv's as strings.
+    If no output dataframe is provided, an empty one is generated and filled.
     """
     df = pd.read_csv(csv_file_path,names=df_cols)
     df = df.iloc[3:]
+    df = df.astype(float)
     print(df)
     return df
 
@@ -36,9 +39,9 @@ def get_bodypart(df_all_bp, df_spec_bp=pd.DataFrame(), bodypart=str):
     The information gets changed into floats, because DLC saves it in csv's as strings.
     If no output dataframe is provided, an empty one is generated and filled.
     """
-    df_spec_bp[bodypart+"_x"] = df_all_bp[bodypart+"_x"].astype(float)
-    df_spec_bp[bodypart+"_y"] = df_all_bp[bodypart+"_y"].astype(float)
-    df_spec_bp[bodypart+"_likelihood"] = df_all_bp[bodypart+"_likelihood"].astype(float)
+    df_spec_bp[bodypart+"_x"] = df_all_bp[bodypart+"_x"]
+    df_spec_bp[bodypart+"_y"] = df_all_bp[bodypart+"_y"]
+    df_spec_bp[bodypart+"_likelihood"] = df_all_bp[bodypart+"_likelihood"]
     return df_spec_bp
     
     
