@@ -19,8 +19,14 @@ for file in file_list:
 """
 
 df = rewrite_dataframe(csv_file_path=file_list[0])
-element = df["left_ear_likelihood"].iloc[1]
-print(type(element))
+
+metadata = get_metadata(csv_file_path=file_list[0])
+
+metadata = save_metadata_in_df(metadata)
+#metadata = metadata.T
+#print(metadata)
+#metadata = metadata.rename(columns={0:"Metadata"})
+print(metadata)
 
 new_df = get_bodypart(df_all_bp=df, bodypart="left_ear")
 
