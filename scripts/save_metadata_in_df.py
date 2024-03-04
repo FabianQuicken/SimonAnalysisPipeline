@@ -7,6 +7,6 @@ def save_metadata_in_df(metadata_dic):
     a one column dataframe containing the metadata
     """
     df = pd.DataFrame(data=metadata_dic)
-    df = df.T
-    df = df.rename(columns={0:"metadata"})
+    #df = df.T
+    #df = df.rename(columns={0:"metadata"})
     return df

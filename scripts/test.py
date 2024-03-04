@@ -7,6 +7,7 @@ from get_metadata import get_metadata
 from save_metadata_in_df import save_metadata_in_df
 from get_bodyparts_from_DLC import rewrite_dataframe, get_bodypart
 from likelihood_filter import likelihood_filtering
+from save_to_csv import metadata_bodyparts_to_csv
 
 
 path = "C:/Code/SimonAnalysisPipeline/raw/*"
@@ -26,11 +27,13 @@ metadata = save_metadata_in_df(metadata)
 #metadata = metadata.T
 #print(metadata)
 #metadata = metadata.rename(columns={0:"Metadata"})
-print(metadata)
+
 
 new_df = get_bodypart(df_all_bp=df, bodypart="left_ear")
 
 new_df = likelihood_filtering(df=new_df, likelihood_row_name="left_ear_likelihood", filter_val=0.95)
+
+metadata_bodyparts_to_csv(bodyparts_df=new_df,metadata_df=metadata, path="C:/Code/SimonAnalysisPipeline/processed/new_save.csv")
 
 #df1 = pd.DataFrame({"likelihood":[0.99,0.98,0.93,0.94,0.96,0.95]})
 #df1_filtered = likelihood_filtering(df=df1)

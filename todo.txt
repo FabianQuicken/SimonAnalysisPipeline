@@ -1,2 +1,8 @@
 Ich sollte die float konvertierung vermutlich in die rewrite dataframe function einbauen
-außerdem sollte ich die geänderten dlc csv dataaframes auch irgendwo speichern -->das sollte die nächste funktion werden
+speicher funktion anpassen, dass metadate in den namen kommt
+links rechts pref function
+speed function
+investigation time function
+weitere behavior parameter functions
+
+
