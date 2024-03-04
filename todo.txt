@@ -1,8 +1,23 @@
-Ich sollte die float konvertierung vermutlich in die rewrite dataframe function einbauen
-speicher funktion anpassen, dass metadate in den namen kommt
-links rechts pref function
-speed function
+
+speicher funktion anpassen, dass metadata in den namen kommt
+
 investigation time function
 weitere behavior parameter functions
+cage edge func?
+immobile time func
+
+total investigation time
+discrimination index
+investigation time habituation/experiment 
+relative to experiment time
+
+
+funktionen für figuren:
+likelihood histogramme
+heatmap
+speed histogramme
+trajectory figure
+
+
 
 
