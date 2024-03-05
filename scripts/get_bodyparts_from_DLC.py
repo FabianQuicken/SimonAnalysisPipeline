@@ -29,16 +29,17 @@ def rewrite_dataframe(csv_file_path, df_cols = dlc_petridish_layout):
     df = df.astype(float)
     return df
 
-def get_bodypart(df_all_bp, df_spec_bp=pd.DataFrame(), bodypart=str):
+def get_bodypart(df_all_bp, df_spec_bp=pd.DataFrame(), bodypart_list=list):
     """
     Important: A modified dataframe must be passed to this func, like in rewrite_df().
     Adds bodypart information (bodypart_x, bodypart_y, bodypart_likelihood)
     To another dataframe and returns this dataframe.
     If no output dataframe is provided, an empty one is generated and filled.
     """
-    df_spec_bp[bodypart+"_x"] = df_all_bp[bodypart+"_x"]
-    df_spec_bp[bodypart+"_y"] = df_all_bp[bodypart+"_y"]
-    df_spec_bp[bodypart+"_likelihood"] = df_all_bp[bodypart+"_likelihood"]
+    for bodypart in bodypart_list:
+        df_spec_bp[bodypart+"_x"] = df_all_bp[bodypart+"_x"]
+        df_spec_bp[bodypart+"_y"] = df_all_bp[bodypart+"_y"]
+        df_spec_bp[bodypart+"_likelihood"] = df_all_bp[bodypart+"_likelihood"]
     return df_spec_bp
     
     

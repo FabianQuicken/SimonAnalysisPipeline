@@ -74,7 +74,7 @@ def distance_travelled(data,bodypart=str):
 
 
 
-def calculate_speed(distance_array,fps=60,pixel_per_cm=8.625):
+def calculate_speed(distance_array,fps=60,pixel_per_cm=34.77406):
     """
     calculates the speed between frames in cm/s
     """
@@ -157,7 +157,16 @@ def distance_bodypart_bodypart(data, bodypart_1=str, bodypart_2=str):
     
 
 
+def investigation_time(distance_values, factor = 1):
+    pixel_per_cm = 34.77406
+    radius_threshold = factor * pixel_per_cm
+    is_investigating = np.zeros((len(distance_values),1))
+    for i in range(len(distance_values)-1):
+        if distance_values[i] < radius_threshold:
+            is_investigating[i] = 1
+    return is_investigating
 
+def immobile_time(speed_values, immobile_threshold = 1)
 
 
 

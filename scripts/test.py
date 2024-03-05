@@ -9,7 +9,7 @@ from save_metadata_in_df import save_metadata_in_df
 from get_bodyparts_from_DLC import rewrite_dataframe, get_bodypart
 from likelihood_filter import likelihood_filtering,likelihood_filtering_nans
 from save_to_csv import metadata_bodyparts_to_csv
-from calculate_parameters import distance_travelled, calculate_speed, distance_bodypart_object, distance_bodypart_bodypart,time_spent_sides
+from calculate_parameters import distance_travelled, calculate_speed, distance_bodypart_object, distance_bodypart_bodypart,time_spent_sides,investigation_time
 
 """
 !!! HOW TO USE THE CODE !!!
@@ -30,8 +30,11 @@ column headings in the style of: prediction_1_x,
                                  ...,
 
 Next, a new DataFrame can get generated containing 
-only predictions of interest via get_bodypart().
+only predictions of interest passed to get_bodypart()
+with a list of strings.
 This df can be expanded as needed.
+
+
 
 """
 
@@ -46,28 +49,29 @@ for file in file_list:
     print(save_metadata_in_df(get_metadata(file)))
 """
 
-df = rewrite_dataframe(csv_file_path=file_list[0])
-
-metadata = get_metadata(csv_file_path=file_list[0])
+df = rewrite_dataframe(csv_file_path=file_list[8])
+metadata = get_metadata(csv_file_path=file_list[8])
 
 metadata = save_metadata_in_df(metadata)
 #metadata = metadata.T
 
 #metadata = metadata.rename(columns={0:"Metadata"})
 
-
-new_df = get_bodypart(df_all_bp=df, bodypart="nose")
+new_df = get_bodypart(df_all_bp=df,bodypart_list=["nose", "left_dish", "right_dish", "center", "topleft", "topright"])
 #new_df = likelihood_filtering_nans(df=new_df, likelihood_row_name="nose_likelihood", filter_val=0.95)
-new_df = get_bodypart(df_all_bp=df, df_spec_bp=new_df, bodypart="left_dish")
-new_df = get_bodypart(df_all_bp=df, df_spec_bp=new_df, bodypart="right_dish")
-new_df = get_bodypart(df_all_bp=df, df_spec_bp=new_df, bodypart="center")
-new_df = get_bodypart(df_all_bp=df, df_spec_bp=new_df, bodypart="topleft")
-new_df = get_bodypart(df_all_bp=df, df_spec_bp=new_df, bodypart="topright")
 distance = distance_travelled(data = new_df, bodypart = "center")
 speed = calculate_speed(distance)
 distance_to_leftdish = distance_bodypart_object(data=new_df,bodypart="nose",object="left_dish")
 distance_to_rightdish = distance_bodypart_object(data=new_df,bodypart="nose",object="right_dish")
 is_left, is_right = time_spent_sides(data = new_df,bodypart="center",edge_left="topleft", edge_right="topright")
+is_investigating_left = investigation_time(distance_to_leftdish,factor=1.5)
+is_investigating_right = investigation_time(distance_to_rightdish,factor=1.5)
+print(metadata)
+print(f"{np.nansum(is_left)}, {np.nansum(is_right)}")
+print(sum(is_investigating_left))
+print(len(is_investigating_left))
+print(sum(is_investigating_right))
+print(len(is_investigating_right))
 
 
 
