@@ -71,8 +71,8 @@ for file in tqdm(file_list):
                 "is_immobile":is_immobile,
                 "distance_nose_leftdish":distance_to_leftdish,
                 "distance_nose_rightdish":distance_to_rightdish,
-                "is_left_cagehalf": is_left,
-                "is_right_cagehalf": is_right,
+                "center_is_left_cagehalf": is_left,
+                "center_is_right_cagehalf": is_right,
                 "is_investigating_leftdish": is_investigating_left,
                 "is_investigating_rightdish": is_investigating_right}
 
