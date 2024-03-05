@@ -1,6 +1,7 @@
 import pandas as pd
 import glob
 from configurations import mice, paradigms, networks, cameras
+import os
 
 def check_string_in_string(full_string, part_string):
     """
@@ -12,7 +13,21 @@ def check_string_in_string(full_string, part_string):
     else:
         return False
     
-def get_metadata(csv_file_path, mice=mice, paradigms=paradigms, networks=networks, cameras=cameras):
+def get_metadata(csv_file_path):
+    file_name = os.path.splitext(os.path.basename(csv_file_path))[0]
+    parts = file_name.split('_')
+    date = parts[0]
+    camera = parts[1]
+    mouse = parts[2]
+    paradigm = parts[3]+"_"+parts[4]+"_"+parts[5][:-3]
+    return {"date": date,
+            "camera": camera,
+            "mouse": mouse,
+            "paradigm": paradigm}
+
+
+    
+def get_metadata_old(csv_file_path, mice=mice, paradigms=paradigms, networks=networks, cameras=cameras):
     """
     this function saves important metadata from the filename:
     mouse, date, paradigm, networkname, camera

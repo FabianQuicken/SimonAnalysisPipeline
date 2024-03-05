@@ -1,15 +1,12 @@
 
 import glob
-from configurations import mice, paradigms, networks, cameras
-import pandas as pd
-import numpy as np
+from tqdm import tqdm
+import time
 
 from get_metadata import get_metadata
-from save_metadata_in_df import save_metadata_in_df
 from get_bodyparts_from_DLC import rewrite_dataframe, get_bodypart
-from likelihood_filter import likelihood_filtering,likelihood_filtering_nans
-from save_to_csv import metadata_bodyparts_to_csv
-from calculate_parameters import distance_travelled, calculate_speed, distance_bodypart_object, distance_bodypart_bodypart,time_spent_sides,investigation_time
+from save_to_csv import metadata_bodyparts_to_csv, parameters_to_csv
+from calculate_parameters import distance_travelled, calculate_speed, distance_bodypart_object, distance_bodypart_bodypart,time_spent_sides,investigation_time,immobile_time
 
 """
 !!! HOW TO USE THE CODE !!!
@@ -42,43 +39,53 @@ This df can be expanded as needed.
 
 path = "C:/Users/quicken/Code/SimonAnalysisPipeline/raw/*"
 file_list = glob.glob(path)
-print(file_list)
-
-"""
-for file in file_list:
-    print(save_metadata_in_df(get_metadata(file)))
-"""
-
-df = rewrite_dataframe(csv_file_path=file_list[8])
-metadata = get_metadata(csv_file_path=file_list[8])
-
-metadata = save_metadata_in_df(metadata)
-#metadata = metadata.T
-
-#metadata = metadata.rename(columns={0:"Metadata"})
-
-new_df = get_bodypart(df_all_bp=df,bodypart_list=["nose", "left_dish", "right_dish", "center", "topleft", "topright"])
-#new_df = likelihood_filtering_nans(df=new_df, likelihood_row_name="nose_likelihood", filter_val=0.95)
-distance = distance_travelled(data = new_df, bodypart = "center")
-speed = calculate_speed(distance)
-distance_to_leftdish = distance_bodypart_object(data=new_df,bodypart="nose",object="left_dish")
-distance_to_rightdish = distance_bodypart_object(data=new_df,bodypart="nose",object="right_dish")
-is_left, is_right = time_spent_sides(data = new_df,bodypart="center",edge_left="topleft", edge_right="topright")
-is_investigating_left = investigation_time(distance_to_leftdish,factor=1.5)
-is_investigating_right = investigation_time(distance_to_rightdish,factor=1.5)
-print(metadata)
-print(f"{np.nansum(is_left)}, {np.nansum(is_right)}")
-print(sum(is_investigating_left))
-print(len(is_investigating_left))
-print(sum(is_investigating_right))
-print(len(is_investigating_right))
 
 
 
+for file in tqdm(file_list):
+    time.sleep(0.5)
+
+    df = rewrite_dataframe(csv_file_path=file)
+    metadata = get_metadata(csv_file_path=file)
+    new_df = get_bodypart(df_all_bp=df,bodypart_list=["nose", "left_dish", "right_dish", "center", "topleft", "topright"])
+    print("\nGet distance values...")
+    distance = distance_travelled(data = new_df, bodypart = "center")
+    print("\nGet speed values...")
+    speed = calculate_speed(distance)
+    print("\nGet immobile time...")
+    is_immobile = immobile_time(speed_values=speed)
+    print("\nGet distance to left dish...")
+    distance_to_leftdish = distance_bodypart_object(data=new_df,bodypart="nose",object="left_dish")
+    print("\nGet distance to right dish...")
+    distance_to_rightdish = distance_bodypart_object(data=new_df,bodypart="nose",object="right_dish")
+    print("\nGet time spent on either cagehalf...")
+    is_left, is_right = time_spent_sides(data = new_df,bodypart="center",edge_left="topleft", edge_right="topright")
+    print("\nGet dish investigation left...")
+    is_investigating_left = investigation_time(distance_to_leftdish,factor=1.5)
+    print("\nGet dish investigation right...")
+    is_investigating_right = investigation_time(distance_to_rightdish,factor=1.5)
+
+
+    parameters = {"distance_travelled_center":distance,
+                "speed_in_hm/h":speed,
+                "is_immobile":is_immobile,
+                "distance_nose_leftdish":distance_to_leftdish,
+                "distance_nose_rightdish":distance_to_rightdish,
+                "is_left_cagehalf": is_left,
+                "is_right_cagehalf": is_right,
+                "is_investigating_leftdish": is_investigating_left,
+                "is_investigating_rightdish": is_investigating_right}
+
+
+    metadata_bodyparts_to_csv(metadata_dic=metadata,bodyparts_df=new_df,path="./processed/")
+    parameters_to_csv(metadata_dic=metadata,parameters=parameters,path="./processed/")
+
+    
 
 
 
-#metadata_bodyparts_to_csv(bodyparts_df=new_df,metadata_df=metadata, path="C:/Code/SimonAnalysisPipeline/processed/new_save.csv")
+
+
 
 
 
