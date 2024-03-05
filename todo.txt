@@ -1,10 +1,10 @@
 
-speicher funktion anpassen, dass metadata in den namen kommt
 
-speed in km/h umrechnen
+
+
 weitere behavior parameter functions
 cage edge func?
-immobile time func
+
 
 total investigation time
 discrimination index
