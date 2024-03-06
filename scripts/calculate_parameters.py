@@ -3,6 +3,7 @@ import pandas as pd
 from mathematics import euklidean_distance
 from likelihood_filter import likelihood_filtering,likelihood_filtering_nans
 
+pixel_per_cm=34.77406
 
 def time_spent_sides(data,bodypart=str,edge_left=str, edge_right=str):
     print(f"Filtering {bodypart} for time spent on either cage half.")
@@ -53,7 +54,7 @@ def distance_travelled(data,bodypart=str):
     """
     Takes a Dataframe and a bodypart as input
     calculates the distance of a keypoint
-    between consequetive frames.
+    between consequetive frames in cm.
     Note: Likelihood filtering gets applied for the bodypart.
     """
     print(f"Filtering {bodypart} for distance calculation...")
@@ -72,18 +73,19 @@ def distance_travelled(data,bodypart=str):
                                                 y1=bodypart_y[i],
                                                 x2=bodypart_x[i+1],
                                                 y2=bodypart_y[i+1])
+        distance_values[i] = distance_values[i] / pixel_per_cm
     return distance_values
 
 
 
-def calculate_speed(distance_array,fps=60,pixel_per_cm=34.77406):
+def calculate_speed(distance_array,fps=60):
     """
     calculates the speed between frames in km/h
     """
     #distance_values = np.array(parameter_df["distance"])
     distance_values = distance_array
     for i in range(len(distance_values)):
-        distance_values[i]=((distance_values[i]*fps)/pixel_per_cm)*0.036 #changing cm/s to km/h
+        distance_values[i]=((distance_values[i]*fps))*0.036 #changing cm/s to km/h
     speed_between_frames = distance_values
     for i in range(len(speed_between_frames)-1):
         if speed_between_frames[i] > 50:
@@ -168,14 +170,14 @@ def investigation_time(distance_values, factor = 1):
     for i in range(len(distance_values)-1):
         if distance_values[i] < radius_threshold:
             is_investigating[i] = 1
-    return is_investigating
+    return is_investigating, factor
 
 def immobile_time(speed_values, immobile_threshold = 0.1):
     is_immobile = np.zeros((len(speed_values)))
     for i in range(len(speed_values)-1):
         if speed_values[i] < immobile_threshold:
             is_immobile[i] = 1
-    return is_immobile
+    return is_immobile, immobile_threshold
 
 
 

@@ -19,7 +19,9 @@ def get_metadata(csv_file_path):
     date = parts[0]
     camera = parts[1]
     mouse = parts[2]
-    paradigm = parts[3]+"_"+parts[4]+"_"+parts[5][:-3]
+    if "DLC" in parts[5]:
+        parts[5] = parts[5][:-3]
+    paradigm = parts[3]+"_"+parts[4]+"_"+parts[5]
     return {"date": date,
             "camera": camera,
             "mouse": mouse,
