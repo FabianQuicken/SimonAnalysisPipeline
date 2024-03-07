@@ -108,7 +108,6 @@ deg_path = "./raw/deg_new/*"
 deg_path_done = "./raw/deg_done/"
 deg_file_list = glob.glob(deg_path)
 
-
 # get all possible parameter paths
 parameter_new_path = "./processed/parameters/new/*"
 parameter_new_list = glob.glob(parameter_new_path)
@@ -124,7 +123,6 @@ for deg_file in tqdm(deg_file_list):
     deg_df = pd.read_csv(deg_file)
     parameter_df, parameter_df_path = find_parameter_file(deg_file=deg_file, metadata_dic=deg_metadata, parameter_paths=parameter_full_list)
 
-
     # append DeepEthogram data to the parameter_df
     parameter_df["deg_is_investigating_leftdish"] = np.array(deg_df["leftsniffing"])
     parameter_df["deg_is_investigating_rightdish"] = np.array(deg_df["rightsniffing"])
@@ -134,21 +132,17 @@ for deg_file in tqdm(deg_file_list):
 
     shutil.move(deg_file, deg_path_done)
     
-
-
 # # # # End: Get data from DeepEthogram, append it to the respective parameters files # # # #
 
 
     
 
-# # # # Start: Take processed data, calculate metrics, save metrics of similar paradigm recordings in one csv  # # # #
+# # # # Start: Take processed (parameter) data, calculate metrics, save metrics of similar paradigm recordings in one csv  # # # #
     
-# further postprocessing steps, based on the parameters
 path_parameters = "./processed/parameters/new/*"
 path_parameters_done = "./processed/parameters/done/"
 file_list_parameters = glob.glob(path_parameters)
 p_parameters_df_initialized = False
-
 
 for file in tqdm(file_list_parameters):
     time.sleep(0.5)
@@ -188,7 +182,7 @@ for file in tqdm(file_list_parameters):
 
 save_hab_exp(p_parameters_df)
 
-# # # # End: Take processed data, calculate metrics, save metrics of similar paradigm recordings in one csv  # # # #
+# # # # End: Take processed (parameter) data, calculate metrics, save metrics of similar paradigm recordings in one csv  # # # #
 
 
 
