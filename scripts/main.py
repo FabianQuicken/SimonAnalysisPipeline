@@ -8,9 +8,10 @@ import shutil
 
 from get_metadata import get_metadata
 from get_bodyparts_from_DLC import rewrite_dataframe, get_bodypart
-from save_to_csv import metadata_bodyparts_to_csv, parameters_to_csv, ini_processed_parameters_df, append_processed_parameters_df, processed_bodyparts_to_csv, append_to_existing_csv
+from save_to_csv import metadata_bodyparts_to_csv, parameters_to_csv, ini_processed_parameters_df, append_processed_parameters_df, save_hab_exp
 from calculate_parameters import distance_travelled, calculate_speed, distance_bodypart_object, distance_bodypart_bodypart,time_spent_sides,investigation_time,immobile_time
 from further_processing import percent_of_total_inv_time, disc_index, total_inv_time, median_speed, full_distance, full_immobile_time
+from get_parameters import find_parameter_file
 
 """
 !!! HOW TO USE THE CODE !!!
@@ -40,6 +41,8 @@ This df can be expanded as needed.
 """
 
 
+# # # # Start: Get data from DeepLabCut, calculate parameters, save used bodyparts and parameters as csv  # # # #
+
 # get path of all files
 path = "./raw/new/*"
 path_done = "./raw/done/"
@@ -51,19 +54,15 @@ for file in tqdm(file_list):
 
     df = rewrite_dataframe(csv_file_path=file) # rewrites the dataframe of dlc for easier readibility
     metadata = get_metadata(csv_file_path=file) # get metadata from the file name
-    new_df = get_bodypart(df_all_bp=df,bodypart_list=["nose", "left_dish", "right_dish", "center", "topleft", "topright"]) # new df 
-    # only containing bodypart data used for calculations
-    print("\nGet distance values...")
+    # new df only containing bodypart data used for calculations
+    new_df = get_bodypart(df_all_bp=df,bodypart_list=["nose", "left_dish", "right_dish", "center", "topleft", "topright"])  
+    
+    # getting all the parameters from the DLC Data
     distance = distance_travelled(data = new_df, bodypart = "center")
-    print("\nGet speed values...")
     speed = calculate_speed(distance)
-    print("\nGet immobile time...")
     is_immobile, immobile_threshold = immobile_time(speed_values=speed)
-    print("\nGet distance to left dish...")
     distance_to_leftdish = distance_bodypart_object(data=new_df,bodypart="nose",object="left_dish")
-    print("\nGet distance to right dish...")
     distance_to_rightdish = distance_bodypart_object(data=new_df,bodypart="nose",object="right_dish")
-    print("\nGet time spent on either cagehalf...")
     is_left, is_right = time_spent_sides(data = new_df,bodypart="center",edge_left="topleft", edge_right="topright")
     print("\nGet dish investigation left...")
     is_investigating_left, factor = investigation_time(distance_to_leftdish,factor=1.5)
@@ -99,7 +98,51 @@ for file in tqdm(file_list):
 
     shutil.move(file, path_done)
 
+# # # # End: Get data from DeepLabCut, calculate parameters, save used bodyparts and parameters as csv  # # # #
 
+
+    
+# # # # Start: Get data from DeepEthogram, append it to the respective parameters files # # # #
+
+deg_path = "./raw/deg_new/*"
+deg_path_done = "./raw/deg_done/"
+deg_file_list = glob.glob(deg_path)
+
+
+# get all possible parameter paths
+parameter_new_path = "./processed/parameters/new/*"
+parameter_new_list = glob.glob(parameter_new_path)
+parameter_done_path = "./processed/parameters/done/*"
+parameter_done_list = glob.glob(parameter_done_path)
+parameter_full_list = parameter_new_list + parameter_done_list
+
+for deg_file in tqdm(deg_file_list):
+    time.sleep(0.5)
+
+    # get the DeepEthogram dataframe and the matching parameter_df
+    deg_metadata = get_metadata(deg_file)
+    deg_df = pd.read_csv(deg_file)
+    parameter_df, parameter_df_path = find_parameter_file(deg_file=deg_file, metadata_dic=deg_metadata, parameter_paths=parameter_full_list)
+
+
+    # append DeepEthogram data to the parameter_df
+    parameter_df["deg_is_investigating_leftdish"] = np.array(deg_df["leftsniffing"])
+    parameter_df["deg_is_investigating_rightdish"] = np.array(deg_df["rightsniffing"])
+
+    # save the new parameter_df to the same file
+    parameter_df.to_csv(parameter_df_path)
+
+    shutil.move(deg_file, deg_path_done)
+    
+
+
+# # # # End: Get data from DeepEthogram, append it to the respective parameters files # # # #
+
+
+    
+
+# # # # Start: Take processed data, calculate metrics, save metrics of similar paradigm recordings in one csv  # # # #
+    
 # further postprocessing steps, based on the parameters
 path_parameters = "./processed/parameters/new/*"
 path_parameters_done = "./processed/parameters/done/"
@@ -114,9 +157,9 @@ for file in tqdm(file_list_parameters):
     print(metadata)
     parameters_df = pd.read_csv(file)
 
-    perc_total_inv, exp_or_hab = percent_of_total_inv_time(metadata,parameters_df)
-    total_inv = total_inv_time(metadata, parameters_df)
-    disc_ind = disc_index(metadata, parameters_df)
+    perc_total_inv_dlc, perc_total_inv_deg, exp_or_hab = percent_of_total_inv_time(metadata,parameters_df)
+    total_inv_dlc, total_inv_deg = total_inv_time(metadata, parameters_df)
+    disc_ind_dlc, disc_ind_deg = disc_index(metadata, parameters_df)
     median_speed_val = median_speed(parameters_df)
     distance_per_min = full_distance(parameters_df)
     immobile_percentage = full_immobile_time(parameters_df)
@@ -124,9 +167,12 @@ for file in tqdm(file_list_parameters):
     metadata = get_metadata(file)
 
     if not p_parameters_df_initialized:
-        p_parameters = {"Stimulus to total investigation [%]": perc_total_inv,
-                        "Total investigation time [%]": total_inv,
-                        "Discrimination Index": disc_ind,
+        p_parameters = {"Stimulus to total investigation DLC [%]": perc_total_inv_dlc,
+                        "Total investigation time DLC [%]": total_inv_dlc,
+                        "Discrimination Index DLC": disc_ind_dlc,
+                        "Stimulus to total investigation DEG [%]": perc_total_inv_deg,
+                        "Total investigation time DEG [%]": total_inv_deg,
+                        "Discrimination Index DEG": disc_ind_deg,
                         "Median speed [km/h]": median_speed_val,
                         "Distance per recording [m]": distance_per_min,
                         "Immobile time [%]": immobile_percentage}
@@ -134,27 +180,17 @@ for file in tqdm(file_list_parameters):
         p_parameters_df_initialized = True
 
     elif p_parameters_df_initialized:
-        p_parameters = [perc_total_inv,total_inv,disc_ind,median_speed_val,distance_per_min,immobile_percentage]
+        p_parameters = [perc_total_inv_dlc, total_inv_dlc, disc_ind_dlc, perc_total_inv_deg, total_inv_deg, disc_ind_deg, median_speed_val, distance_per_min, immobile_percentage]
         p_parameters_df = append_processed_parameters_df(processed_parameters_df=p_parameters_df,processed_parameters=p_parameters,metadata_dic=metadata)
     
     shutil.move(file, path_parameters_done)
 
 
-df_habituation = p_parameters_df[p_parameters_df.index.str.contains('Habituation')]
-df_experiment = p_parameters_df[p_parameters_df.index.str.contains('Experiment')]
+save_hab_exp(p_parameters_df)
+
+# # # # End: Take processed data, calculate metrics, save metrics of similar paradigm recordings in one csv  # # # #
 
 
-
-
-try:
-    append_to_existing_csv(existing_csv_path="./processed/processed_parameters/experiment_processed_parameters.csv", new_df=df_experiment)
-except:
-    processed_bodyparts_to_csv(habituation=False, p_parameters=df_experiment, path="./processed/processed_parameters/")
-
-try:
-    append_to_existing_csv(existing_csv_path="./processed/processed_parameters/habituation_processed_parameters.csv", new_df=df_habituation)
-except:
-    processed_bodyparts_to_csv(habituation=True, p_parameters=df_habituation, path="./processed/processed_parameters/")
 
 
  

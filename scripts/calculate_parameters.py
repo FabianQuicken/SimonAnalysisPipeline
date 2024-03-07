@@ -6,6 +6,7 @@ from likelihood_filter import likelihood_filtering,likelihood_filtering_nans
 pixel_per_cm=34.77406
 
 def time_spent_sides(data,bodypart=str,edge_left=str, edge_right=str):
+    print("\nGet time spent on either cagehalf...")
     print(f"Filtering {bodypart} for time spent on either cage half.")
     data = likelihood_filtering_nans(df=data, 
                                 likelihood_row_name=bodypart+"_likelihood")
@@ -57,6 +58,7 @@ def distance_travelled(data,bodypart=str):
     between consequetive frames in cm.
     Note: Likelihood filtering gets applied for the bodypart.
     """
+    print("\nGet distance values...")
     print(f"Filtering {bodypart} for distance calculation...")
     data = likelihood_filtering_nans(df=data, 
                                 likelihood_row_name=bodypart+"_likelihood")
@@ -82,6 +84,7 @@ def calculate_speed(distance_array,fps=60):
     """
     calculates the speed between frames in km/h
     """
+    print("\nGet speed values...")
     #distance_values = np.array(parameter_df["distance"])
     distance_values = distance_array
     for i in range(len(distance_values)):
@@ -102,6 +105,7 @@ def distance_bodypart_object(data, bodypart=str, object=str):
     Object should not move during recording, since
     the first good prediction will be set to the object location.
     """
+    print(f"\nGet distance {bodypart} to {object}...")
     print(f"Filtering {bodypart} for object distance calculation...")
     data = likelihood_filtering_nans(df=data, 
                                 likelihood_row_name=bodypart+"_likelihood")
@@ -173,6 +177,7 @@ def investigation_time(distance_values, factor = 1):
     return is_investigating, factor
 
 def immobile_time(speed_values, immobile_threshold = 0.1):
+    print("\nGet immobile time...")
     is_immobile = np.zeros((len(speed_values)))
     for i in range(len(speed_values)-1):
         if speed_values[i] < immobile_threshold:

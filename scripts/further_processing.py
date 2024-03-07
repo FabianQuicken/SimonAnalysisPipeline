@@ -10,16 +10,32 @@ def get_paradigm(metadata, parameter_df):
     if "right" in metadata["paradigm"]:
         urine_stim = parameter_df["is_investigating_rightdish"]
         control_stim = parameter_df["is_investigating_leftdish"]
-        print("right")
+        try:
+            urine_stim_deg = parameter_df["deg_is_investigating_rightdish"]
+            control_stim_deg = parameter_df["deg_is_investigating_leftdish"]
+        except:
+            print("No deg data available.")
+        
     elif "left" in metadata["paradigm"]:
         urine_stim = parameter_df["is_investigating_leftdish"]
         control_stim = parameter_df["is_investigating_rightdish"]
-        print("left")
+        try:
+            urine_stim_deg = parameter_df["deg_is_investigating_leftdish"]
+            control_stim_deg = parameter_df["deg_is_investigating_rightdish"]
+        except:
+            print("No deg data available.")
+        
 
     urine_stim = np.array(urine_stim)
     control_stim = np.array(control_stim)
+    try:
+        urine_stim_deg = np.array(urine_stim_deg)
+        control_stim_deg = np.array(control_stim_deg)
+    except:
+        urine_stim_deg = np.zeros(len(urine_stim))
+        control_stim_deg = np.zeros(len(control_stim))
 
-    return exp_or_hab, urine_stim, control_stim
+    return exp_or_hab, urine_stim, control_stim, urine_stim_deg, control_stim_deg
     
     
 
@@ -27,19 +43,25 @@ def get_paradigm(metadata, parameter_df):
 
 def percent_of_total_inv_time(metadata, parameter_df):
 
-    exp_or_hab, urine_stim, control_stim = get_paradigm(metadata, parameter_df)
-    return sum(urine_stim) / ((sum(urine_stim) + sum(control_stim))) * 100, exp_or_hab
+    exp_or_hab, urine_stim, control_stim, urine_stim_deg, control_stim_deg = get_paradigm(metadata, parameter_df)
+    dlc_calc = sum(urine_stim) / ((sum(urine_stim) + sum(control_stim))) * 100
+    deg_calc = sum(urine_stim_deg) / ((sum(urine_stim_deg) + sum(control_stim_deg))) * 100
+    return dlc_calc, deg_calc, exp_or_hab
 
 
 def disc_index(metadata, parameter_df):
 
-    exp_or_hab, urine_stim, control_stim = get_paradigm(metadata, parameter_df)
-    return (sum(urine_stim) - sum(control_stim)) / (sum(urine_stim) + sum(control_stim))
+    exp_or_hab, urine_stim, control_stim, urine_stim_deg, control_stim_deg = get_paradigm(metadata, parameter_df)
+    dlc_calc = (sum(urine_stim) - sum(control_stim)) / (sum(urine_stim) + sum(control_stim))
+    deg_calc = (sum(urine_stim_deg) - sum(control_stim_deg)) / (sum(urine_stim_deg) + sum(control_stim_deg))
+    return dlc_calc, deg_calc
 
 def total_inv_time(metadata, parameter_df):
     
-    exp_or_hab, urine_stim, control_stim = get_paradigm(metadata, parameter_df)
-    return sum(urine_stim) + sum(control_stim) / len(urine_stim) * 100
+    exp_or_hab, urine_stim, control_stim, urine_stim_deg, control_stim_deg = get_paradigm(metadata, parameter_df)
+    dlc_calc = (sum(urine_stim) + sum(control_stim)) / len(urine_stim) * 100
+    deg_calc = (sum(urine_stim_deg) + sum(control_stim_deg)) / len(urine_stim_deg) * 100
+    return dlc_calc, deg_calc
 
 def median_speed(parameter_df):
     median_speed = parameter_df["speed_in_km/h"]
