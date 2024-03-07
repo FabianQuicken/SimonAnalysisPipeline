@@ -5,7 +5,8 @@ from likelihood_filter import likelihood_filtering,likelihood_filtering_nans
 
 pixel_per_cm=34.77406
 
-def time_spent_sides(data,bodypart=str,edge_left=str, edge_right=str):
+def time_spent_sides(df,bodypart=str,edge_left=str, edge_right=str):
+    data = df.copy()
     print("\nGet time spent on either cagehalf...")
     print(f"Filtering {bodypart} for time spent on either cage half.")
     data = likelihood_filtering_nans(df=data, 
@@ -51,13 +52,14 @@ def time_spent_sides(data,bodypart=str,edge_left=str, edge_right=str):
 
 
 
-def distance_travelled(data,bodypart=str):
+def distance_travelled(df,bodypart=str):
     """
     Takes a Dataframe and a bodypart as input
     calculates the distance of a keypoint
     between consequetive frames in cm.
     Note: Likelihood filtering gets applied for the bodypart.
     """
+    data = df.copy()
     print("\nGet distance values...")
     print(f"Filtering {bodypart} for distance calculation...")
     data = likelihood_filtering_nans(df=data, 
@@ -97,7 +99,7 @@ def calculate_speed(distance_array,fps=60):
 
 
 
-def distance_bodypart_object(data, bodypart=str, object=str):
+def distance_bodypart_object(df, bodypart=str, object=str):
     """
     Takes a Dataframe, a bodypart and an object as strings,
     to calculate the distance between both.
@@ -105,6 +107,7 @@ def distance_bodypart_object(data, bodypart=str, object=str):
     Object should not move during recording, since
     the first good prediction will be set to the object location.
     """
+    data = df.copy()
     print(f"\nGet distance {bodypart} to {object}...")
     print(f"Filtering {bodypart} for object distance calculation...")
     data = likelihood_filtering_nans(df=data, 
@@ -137,12 +140,13 @@ def distance_bodypart_object(data, bodypart=str, object=str):
     return distance_values
 
 
-def distance_bodypart_bodypart(data, bodypart_1=str, bodypart_2=str):
+def distance_bodypart_bodypart(df, bodypart_1=str, bodypart_2=str):
     """
     Takes a Dataframe and two bodyparts (can be 2 animals) as strings,
     to calculate the distance between both points
     Note: Df gets likelihood filtered for points of interest first.
     """
+    data = df.copy()
     data = likelihood_filtering_nans(df=data, 
                                 likelihood_row_name=bodypart_1+"_likelihood")
     data = likelihood_filtering_nans(df=data, 
