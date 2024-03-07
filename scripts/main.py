@@ -65,9 +65,9 @@ for file in tqdm(file_list):
     distance_to_rightdish = distance_bodypart_object(df=new_df,bodypart="nose",object="right_dish")
     is_left, is_right = time_spent_sides(df = new_df,bodypart="center",edge_left="topleft", edge_right="topright")
     print("\nGet dish investigation left...")
-    is_investigating_left, factor = investigation_time(distance_to_leftdish,factor=1.5)
+    is_investigating_left, factor = investigation_time(distance_to_leftdish,factor=2.2)
     print("\nGet dish investigation right...")
-    is_investigating_right, factor = investigation_time(distance_to_rightdish,factor=1.5)
+    is_investigating_right, factor = investigation_time(distance_to_rightdish,factor=2.2)
 
     # adding array containing information about the radius used for petridish investigation 
     radius_petridish = np.zeros(len(is_investigating_left))

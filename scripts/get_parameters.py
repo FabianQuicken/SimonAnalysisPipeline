@@ -10,10 +10,10 @@ def find_parameter_file(deg_file=str, metadata_dic=dict, parameter_paths=list):
         parameter_metadata = get_metadata(path)
         try:
             if metadata_dic["date"] == parameter_metadata["date"] and metadata_dic["mouse"] == parameter_metadata["mouse"] and metadata_dic["paradigm"] == parameter_metadata["paradigm"]:
-                print("Parameter file found!")
+                print("\nParameter file found!")
                 df = pd.read_csv(path, index_col=0)
                 return df, path
         except:
-            print(f"No corresponding parameter file found for file: {deg_file}.")
+            print(f"\nNo corresponding parameter file found for file: {deg_file}.")
             
 
