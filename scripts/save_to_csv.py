@@ -47,4 +47,18 @@ def append_to_existing_csv(existing_csv_path, new_df):
     merged_df = pd.concat([existing_df, new_df], axis=0, ignore_index=False)
     merged_df.to_csv(existing_csv_path)
 
+def save_hab_exp(processed_parameters_df):
+    df_habituation = processed_parameters_df[processed_parameters_df.index.str.contains('Habituation')]
+    df_experiment = processed_parameters_df[processed_parameters_df.index.str.contains('Experiment')]
+
+    try:
+        append_to_existing_csv(existing_csv_path="./processed/processed_parameters/experiment_processed_parameters.csv", new_df=df_experiment)
+    except:
+        processed_bodyparts_to_csv(habituation=False, p_parameters=df_experiment, path="./processed/processed_parameters/")
+
+    try:
+        append_to_existing_csv(existing_csv_path="./processed/processed_parameters/habituation_processed_parameters.csv", new_df=df_habituation)
+    except:
+        processed_bodyparts_to_csv(habituation=True, p_parameters=df_habituation, path="./processed/processed_parameters/")
+
 

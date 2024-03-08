@@ -14,6 +14,11 @@ def check_string_in_string(full_string, part_string):
         return False
     
 def get_metadata(csv_file_path):
+    """
+    Gets the metadata of the file name, based on the naming convention. The name is split with underscores: '_'.
+    The file needs to be named: 'date_camera_mousenumber_paradigm_paradigm_paradigm_....'
+    Paradigm contains information about experiment number (e.g. 'V1'), habituation or experiment, urinright or urinleft.
+    """
     file_name = os.path.splitext(os.path.basename(csv_file_path))[0]
     parts = file_name.split('_')
     date = parts[0]
