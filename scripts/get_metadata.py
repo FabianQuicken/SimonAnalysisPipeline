@@ -21,7 +21,13 @@ def get_metadata(csv_file_path):
     mouse = parts[2]
     if "DLC" in parts[5]:
         parts[5] = parts[5][:-3]
-    paradigm = parts[3]+"_"+parts[4]+"_"+parts[5]
+    #füge erkennung meines paradigms hinzu
+    if camera == "topview" or camera == "sideview":
+        if "DLC" in parts[4]:
+            parts[4] = parts[4][:-3]
+        paradigm = parts[3] + "_" + parts[4]
+    else:
+        paradigm = parts[3]+"_"+parts[4]+"_"+parts[5]
     return {"date": date,
             "camera": camera,
             "mouse": mouse,
