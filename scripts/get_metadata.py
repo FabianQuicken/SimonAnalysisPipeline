@@ -21,9 +21,11 @@ def get_metadata(csv_file_path):
     """
     file_name = os.path.splitext(os.path.basename(csv_file_path))[0]
     parts = file_name.split('_')
-    date = parts[0]
-    camera = parts[1]
-    mouse = parts[2]
+    
+    date = parts [0]
+    camera = parts [1]
+    mouse = parts [2]
+
     if "DLC" in parts[5]:
         parts[5] = parts[5][:-3]
     #füge erkennung meines paradigms hinzu

@@ -41,26 +41,45 @@ def get_paradigm(metadata, parameter_df):
 
 
 
-def percent_of_total_inv_time(metadata, parameter_df):
+def percent_of_total_inv_time(metadata, parameter_df, dlc=True, deg=True):
 
     exp_or_hab, urine_stim, control_stim, urine_stim_deg, control_stim_deg = get_paradigm(metadata, parameter_df)
-    dlc_calc = sum(urine_stim) / ((sum(urine_stim) + sum(control_stim))) * 100
-    deg_calc = sum(urine_stim_deg) / ((sum(urine_stim_deg) + sum(control_stim_deg))) * 100
+    if dlc:
+        dlc_calc = sum(urine_stim) / ((sum(urine_stim) + sum(control_stim))) * 100
+    else:
+        dlc_calc = None
+    if deg:
+        deg_calc = sum(urine_stim_deg) / ((sum(urine_stim_deg) + sum(control_stim_deg))) * 100
+    else:
+        deg_calc = None
+
     return dlc_calc, deg_calc, exp_or_hab
 
 
-def disc_index(metadata, parameter_df):
+def disc_index(metadata, parameter_df, dlc=True, deg=True):
 
     exp_or_hab, urine_stim, control_stim, urine_stim_deg, control_stim_deg = get_paradigm(metadata, parameter_df)
-    dlc_calc = (sum(urine_stim) - sum(control_stim)) / (sum(urine_stim) + sum(control_stim))
-    deg_calc = (sum(urine_stim_deg) - sum(control_stim_deg)) / (sum(urine_stim_deg) + sum(control_stim_deg))
+    if dlc:
+        dlc_calc = (sum(urine_stim) - sum(control_stim)) / (sum(urine_stim) + sum(control_stim))
+    else:
+        dlc_calc = None
+    if deg:
+        deg_calc = (sum(urine_stim_deg) - sum(control_stim_deg)) / (sum(urine_stim_deg) + sum(control_stim_deg))
+    else:
+        deg_calc = None
     return dlc_calc, deg_calc
 
-def total_inv_time(metadata, parameter_df):
+def total_inv_time(metadata, parameter_df, dlc=True, deg=True):
     
     exp_or_hab, urine_stim, control_stim, urine_stim_deg, control_stim_deg = get_paradigm(metadata, parameter_df)
-    dlc_calc = (sum(urine_stim) + sum(control_stim)) / len(urine_stim) * 100
-    deg_calc = (sum(urine_stim_deg) + sum(control_stim_deg)) / len(urine_stim_deg) * 100
+    if dlc:
+        dlc_calc = (sum(urine_stim) + sum(control_stim)) / len(urine_stim) * 100
+    else:
+        dlc_calc = None
+    if deg:
+        deg_calc = (sum(urine_stim_deg) + sum(control_stim_deg)) / len(urine_stim_deg) * 100
+    else: 
+        deg_calc = None
     return dlc_calc, deg_calc
 
 def median_speed(parameter_df):

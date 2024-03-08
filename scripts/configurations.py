@@ -27,7 +27,7 @@ dlc_petridish_layout_fabi = ("leftear_x", "leftear_y", "leftear_likelihood",
                         "tailbase_x", "tailbase_y", "tailbase_likelihood",
                         "topleft_x", "topleft_y", "topleft_likelihood",
                         "topright_x", "topright_y", "topright_likelihood",
-                        "bottomright_x", "bottomright_y", "bottomright_likelihood"
+                        "bottomright_x", "bottomright_y", "bottomright_likelihood",
                         "bottomleft_x", "bottomleft_y", "bottomleft_likelihood",
                         "leftpetridish_x", "leftpetridish_y", "leftpetridish_likelihood",
                         "rightpetridish_x", "rightpetridish_y", "rightpetridish_likelihood"
