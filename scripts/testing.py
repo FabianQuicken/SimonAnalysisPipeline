@@ -12,6 +12,7 @@ from save_to_csv import metadata_bodyparts_to_csv, parameters_to_csv, ini_proces
 from calculate_parameters import distance_travelled, calculate_speed, distance_bodypart_object,time_spent_sides,investigation_time,immobile_time
 from further_processing import percent_of_total_inv_time, disc_index, total_inv_time, median_speed, full_distance, full_immobile_time
 from get_parameters import find_parameter_file
+from figures import eventplot, pieplot
 
 path = "./testing/raw/*"
 path_done = "./testing/done/"
@@ -65,19 +66,36 @@ for file in tqdm(file_list):
     
     # AB HIER TESTCODE FÜR FIGURES
 
-    print(sum(is_investigating_left))
-    print(sum(is_investigating_right)/len(is_investigating_right))
+    """
+    eventplot(metadata=metadata,
+              save_name="investigation behavior", 
+              data_list=[is_investigating_left, is_investigating_right], 
+              lineoffsets=["investigate left dish", "investigate right dish"],
+              colors=["m","y"],
+              skip_frame_stepsize=4)
+    """
+    pieplot(metadata=metadata,data_list=[is_left,is_right], save_name="side_preference",colors=["m","y"],labels=["is left", "is right"])
+    
+
+    
+    """
+    print(len(is_investigating_left))
     plt.figure(figsize=(10,6))
     data_left = np.where(is_investigating_left == 1)[0]
+    print(len(data_left))
     data_right = np.where(is_investigating_right == 1)[0]
     data_left_norm = (data_left / len(is_investigating_left))
     data_right_norm = (data_right / len(is_investigating_right))
     plt.eventplot(data_left_norm, lineoffsets="left", colors="b") 
     plt.eventplot(data_right_norm, lineoffsets="right", colors="r")
     plt.xlim(0, 1)
-    plt.legend()
+    #plt.legend()
     plt.xlabel('Video duration')
     plt.title(f"Mouse: {metadata['mouse']}; Paradigm: {metadata['paradigm']}; Date: {metadata['date']}")
     plt.savefig(f"./testing/{metadata['date']}_{metadata['mouse']}_{metadata['paradigm']}.svg", format='svg')
     plt.show()
+    """
+    
+
+    
    
