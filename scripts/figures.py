@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np 
 import seaborn as sns
+import pandas as pd
 
 def normalize(data_list, normalize_val, skip_frame_stepsize):
     """
@@ -25,7 +26,7 @@ def eventplot(metadata, data_list, lineoffsets, save_name=str, colors = ["r", "b
     Beforehand, the data is downscaled via a stepsize to reduce the amount of bins presented in the eventplot, so the 
     graph will be clearer. Also the data is normalized to the experiment length. Finally, the functions creates an
     eventplot containing the data, labeling it based on the input lineoffsets argument. The figure is saved as .svg
-    based on the experiment metadata.
+    based on the experiment metadata plus a custom information tag, such as "investigation_behavior".
     """
 
     # initialize figure
@@ -34,9 +35,8 @@ def eventplot(metadata, data_list, lineoffsets, save_name=str, colors = ["r", "b
     # reduce the dimensionality of the data to make the plots clearer
     # since a bin for each frame would not work
     for i in range(len(data_list)):
-        print(len(data_list[i]))
         data_list[i] = data_list[i][::skip_frame_stepsize]
-        print(len(data_list[i]))
+ 
 
     # for the normalization: get the length of the arrays before they get filtered for present events 
     experiment_lens = []
@@ -62,11 +62,16 @@ def eventplot(metadata, data_list, lineoffsets, save_name=str, colors = ["r", "b
     plt.show()
 
 
-def pieplot(metadata, data_list, save_name=str, colors=[], labels=[]):
-    
+def pieplot(metadata, data_list, save_name=str, colors=["m","y"], labels=[]):
+    """
+    This function can be used to create pieplots for better visualizing behavior,
+    e.g. whether a mouse preferred the left, or the right cagehalf.
+    Standard colors are magenta and yellow. The fig is saved as .svg based on the experiment
+    metadata plus a custom information tag, such as "side_pref".
+    """
     plt.figure(figsize=(6,6))
-    exp_len = len(data_list[0]) / 3600
-    print(exp_len)
+    #exp_len = len(data_list[0]) / 3600
+    #print(exp_len)
     for i in range(len(data_list)):
         data_list[i] = np.nansum(data_list[i])
         print(data_list[i])       
@@ -76,3 +81,59 @@ def pieplot(metadata, data_list, save_name=str, colors=[], labels=[]):
     plt.title(f"Mouse: {metadata['mouse']}; Paradigm: {metadata['paradigm']}; Date: {metadata['date']}") 
     plt.savefig(f"./testing/{metadata['date']}_{metadata['mouse']}_{metadata['paradigm']}_{save_name}.svg", format='svg')
     plt.show()
+
+def plot_cum_dist(metadata, arr, save_name=str, color=str):
+
+    plt.figure(figsize=(6,6))
+    arr = arr[~np.isnan(arr)]
+    cum_dist = np.cumsum(arr)
+    time_points = np.arange(len(arr))
+    time_points = time_points/len(time_points)*10
+    print(len(time_points))
+
+    plt.plot(time_points, cum_dist, color=color)
+    plt.fill_between(time_points, 0, cum_dist, alpha=0.3, color=color)
+    plt.ylim(0,(1.5*cum_dist[-1]))
+    plt.xlim(0,time_points[-1])
+    plt.xticks([0,time_points[-1]])
+    plt.xlabel('time[min]')
+    plt.ylabel('distance[m]')
+    sns.despine()
+    plt.title(f"Mouse: {metadata['mouse']}; Paradigm: {metadata['paradigm']}; Date: {metadata['date']}") 
+    plt.savefig(f"./testing/{metadata['date']}_{metadata['mouse']}_{metadata['paradigm']}_{save_name}.svg", format='svg')
+    plt.show()
+
+
+def plot_distance_val(metadata, data_list=list, save_name=str, colors=list , labels=list, skip_frame_stepsize=40):
+    plt.figure(figsize=(14,6))
+    time_points = np.arange(len(data_list[0]))
+    for i in range(len(data_list)):
+        data_list[i] = data_list[i][::skip_frame_stepsize]
+    time_points = time_points[::skip_frame_stepsize]
+    
+    time_points = time_points/3600
+    try:
+        df = pd.DataFrame({'index': time_points, 'arr1': data_list[0], 'arr2': data_list[1]})
+        df.dropna()
+        arr1 = df['arr1']
+        arr2 = df['arr2']
+    except:
+        df = pd.DataFrame({'index': time_points, 'arr1': data_list[0]})
+        df.dropna()
+        arr1 = df['arr1']
+    time_points = df['index']
+    
+    try:
+        plt.plot(time_points, arr1, color=colors[0])
+        plt.plot(time_points, arr2, color=colors[1])
+    except:
+        plt.plot(time_points, arr1, color=colors[0])
+    plt.gca().set_facecolor('black')
+    plt.xlabel('Experiment length [min]')
+    plt.title(f"Mouse: {metadata['mouse']}; Paradigm: {metadata['paradigm']}; Date: {metadata['date']}")
+    sns.despine()
+    plt.savefig(f"./testing/{metadata['date']}_{metadata['mouse']}_{metadata['paradigm']}_{save_name}.svg", format='svg')
+    plt.show()
+
+    
+

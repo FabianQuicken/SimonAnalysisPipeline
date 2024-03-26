@@ -77,7 +77,7 @@ def distance_travelled(df,bodypart=str):
                                                 y1=bodypart_y[i],
                                                 x2=bodypart_x[i+1],
                                                 y2=bodypart_y[i+1])
-        distance_values[i] = distance_values[i] / pixel_per_cm
+        distance_values[i] = distance_values[i] / pixel_per_cm / 100 # umrechnung in meter
     return distance_values
 
 

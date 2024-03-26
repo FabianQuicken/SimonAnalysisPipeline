@@ -10,19 +10,10 @@ Created on Thu Feb 29 08:20:54 2024
 import pandas as pd
 import numpy as np
 
-def likelihood_filtering(df, likelihood_row_name = "likelihood", filter_val = 0.95):
-    """
-    DeepLabCut provides a likelihood for the prediction of 
-    each bodypart in each frame to be correct. Filtering predictions
-    for the likelihood, reduces false predictions in the dataset.
-    """
-    df_filtered = df[df[likelihood_row_name] > filter_val]
-    df_removed_rows = df[df[likelihood_row_name] < filter_val]
-    print(f"The filter removed {len(df_removed_rows)} rows of a total of {len(df)} rows.")
-    return df_filtered
 
+# use this most of the time:
 
-def likelihood_filtering_nans(df, likelihood_row_name="likelihood", filter_val=0.95):
+def likelihood_filtering_nans(df, likelihood_row_name=str, filter_val=0.85):
     """
     DeepLabCut provides a likelihood for the prediction of 
     each bodypart in each frame to be correct. Filtering predictions
@@ -33,6 +24,20 @@ def likelihood_filtering_nans(df, likelihood_row_name="likelihood", filter_val=0
     df_filtered.loc[filtered_rows] = np.nan
     num_replaced = filtered_rows.sum()
     print(f"The filter replaced values in {num_replaced} rows with NaN out of a total of {len(df)} rows.")
+    return df_filtered
+
+# use this only if the data doesn't go to a dataframe: 
+
+def likelihood_filtering(df, likelihood_row_name=str, filter_val = 0.85):
+    """
+    DeepLabCut provides a likelihood for the prediction of 
+    each bodypart in each frame to be correct. Filtering predictions
+    for the likelihood, reduces false predictions in the dataset.
+    """
+    df_filtered = df.copy()
+    df_filtered = df[df[likelihood_row_name] > filter_val]
+    df_removed_rows = df[df[likelihood_row_name] < filter_val]
+    print(f"The filter removed {len(df_removed_rows)} rows of a total of {len(df)} rows.")
     return df_filtered
     
 
