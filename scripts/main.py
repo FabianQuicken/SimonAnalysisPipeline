@@ -45,8 +45,8 @@ This df can be expanded as needed.
 # # # # Start: Get data from DeepLabCut, calculate parameters, save used bodyparts and parameters as csv  # # # #
 
 # get path of all files
-path = "./raw/new/*"
-path_done = "./raw/done/"
+path = "./raw/dlc_new/*"
+path_done = "./raw/dlc_done/"
 file_list = glob.glob(path)
 
 # calculate basic parametersfrom dlc data
