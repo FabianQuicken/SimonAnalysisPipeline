@@ -1,5 +1,5 @@
 
-nan function - wenn verhalten an der länge des videos bemessen wird, müssen nans rausgerechnet werden
+nan function - wenn verhalten an der länge des videos bemessen wird, müssen nans rausgerechnet werden !!! 
 
 
 weitere behavior parameter functions
@@ -20,6 +20,7 @@ distance travelled als kurve
 is immobile als event plot
 is left / is right als kuchendiagramm
 distance left dish / distance right dish plotten (ggf. auch als Kurve? Beide Kurven übereinander?) (vllt hier die Stimulusseite dazu nennen)
+distance plot mit event plot kombinieren
 is investigating left / right als eventplots (vllt hier die Stimulusseite dazu nennen)
 DEG verhalten event plots (vllt hier die Stimulusseite dazu nennen)
 

@@ -19,11 +19,12 @@ def time_spent_sides(df,bodypart=str,edge_left=str, edge_right=str):
                                 filter_val=0.99)
     data = likelihood_filtering(df=data, 
                                 likelihood_row_name=edge_right+"_likelihood",
-                                filter_val=0.99)
+                                filter_val=0.99)    
     edge_left_x = data[edge_left+"_x"]
     edge_right_x = data[edge_right+"_x"]
-
+    
     bodypart_x = np.array(bodypart_x)
+
     edge_left_x = np.array(edge_left_x)
     edge_right_x = np.array(edge_right_x)
     edge_left_x = edge_left_x[0]
@@ -32,7 +33,16 @@ def time_spent_sides(df,bodypart=str,edge_left=str, edge_right=str):
 
     middle = (edge_left_x + edge_right_x) / 2
     print(f"The edges (left,right) are set as {round(edge_left_x)}, {round(edge_right_x)}. The midpoint is {round(middle)}.")
-    
+
+    is_left_values = np.where(bodypart_x < middle, 1, 0)
+    is_right_values = np.where(bodypart_x > middle, 1, 0)
+    is_left_values = is_left_values.astype(float)
+    is_right_values = is_right_values.astype(float)
+    is_left_values[np.isnan(bodypart_x)] = np.nan
+    is_right_values[np.isnan(bodypart_x)] = np.nan
+
+
+    """
     is_left_values = np.zeros((len(bodypart_x)))
     is_right_values = np.zeros((len(bodypart_x)))
 
@@ -44,6 +54,7 @@ def time_spent_sides(df,bodypart=str,edge_left=str, edge_right=str):
         elif np.isnan(bodypart_x[i]):
             is_left_values[i] = np.nan
             is_right_values[i] = np.nan
+    """
 
     return is_left_values,is_right_values
 
@@ -56,7 +67,7 @@ def distance_travelled(df,bodypart=str):
     """
     Takes a Dataframe and a bodypart as input
     calculates the distance of a keypoint
-    between consequetive frames in cm.
+    between consequetive frames in m.
     Note: Likelihood filtering gets applied for the bodypart.
     """
     data = df.copy()
@@ -69,6 +80,7 @@ def distance_travelled(df,bodypart=str):
     bodypart_y = data[bodypart+"_y"]
 
     bodypart_x = np.array(bodypart_x) #transforms bodypart data into np array for easier calculation
+    print("distance travelled:\n")
     bodypart_y = np.array(bodypart_y)
 
     distance_values = np.zeros((len(bodypart_x)))
@@ -77,7 +89,7 @@ def distance_travelled(df,bodypart=str):
                                                 y1=bodypart_y[i],
                                                 x2=bodypart_x[i+1],
                                                 y2=bodypart_y[i+1])
-        distance_values[i] = distance_values[i] / pixel_per_cm / 100 # umrechnung in meter
+        distance_values[i] = distance_values[i] / (pixel_per_cm*100) # umrechnung in meter
     return distance_values
 
 
@@ -90,7 +102,7 @@ def calculate_speed(distance_array,fps=60):
     #distance_values = np.array(parameter_df["distance"])
     distance_values = distance_array
     for i in range(len(distance_values)):
-        distance_values[i]=((distance_values[i]*fps))*0.036 #changing cm/s to km/h
+        distance_values[i]=((distance_values[i]*fps))*3.6 #changing m/s to km/h
     speed_between_frames = distance_values
     for i in range(len(speed_between_frames)-1):
         if speed_between_frames[i] > 50:
@@ -178,6 +190,8 @@ def investigation_time(distance_values, factor = 1):
     for i in range(len(distance_values)-1):
         if distance_values[i] < radius_threshold:
             is_investigating[i] = 1
+        elif np.isnan(distance_values[i]):
+            is_investigating[i] = np.nan
     return is_investigating, factor
 
 def immobile_time(speed_values, immobile_threshold = 0.1):
@@ -186,6 +200,8 @@ def immobile_time(speed_values, immobile_threshold = 0.1):
     for i in range(len(speed_values)-1):
         if speed_values[i] < immobile_threshold:
             is_immobile[i] = 1
+        elif np.isnan(speed_values[i]):
+            is_immobile[i] = np.nan
     return is_immobile, immobile_threshold
 
 

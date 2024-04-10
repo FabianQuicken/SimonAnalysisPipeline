@@ -45,11 +45,11 @@ def percent_of_total_inv_time(metadata, parameter_df, dlc=True, deg=True):
 
     exp_or_hab, urine_stim, control_stim, urine_stim_deg, control_stim_deg = get_paradigm(metadata, parameter_df)
     if dlc:
-        dlc_calc = sum(urine_stim) / ((sum(urine_stim) + sum(control_stim))) * 100
+        dlc_calc = np.nansum(urine_stim) / ((np.nansum(urine_stim) + np.nansum(control_stim))) * 100
     else:
         dlc_calc = None
     if deg:
-        deg_calc = sum(urine_stim_deg) / ((sum(urine_stim_deg) + sum(control_stim_deg))) * 100
+        deg_calc = np.nansum(urine_stim_deg) / ((np.nansum(urine_stim_deg) + np.nansum(control_stim_deg))) * 100
     else:
         deg_calc = None
 
@@ -60,11 +60,11 @@ def disc_index(metadata, parameter_df, dlc=True, deg=True):
 
     exp_or_hab, urine_stim, control_stim, urine_stim_deg, control_stim_deg = get_paradigm(metadata, parameter_df)
     if dlc:
-        dlc_calc = (sum(urine_stim) - sum(control_stim)) / (sum(urine_stim) + sum(control_stim))
+        dlc_calc = (np.nansum(urine_stim) - np.nansum(control_stim)) / (np.nansum(urine_stim) + np.nansum(control_stim))
     else:
         dlc_calc = None
     if deg:
-        deg_calc = (sum(urine_stim_deg) - sum(control_stim_deg)) / (sum(urine_stim_deg) + sum(control_stim_deg))
+        deg_calc = (np.nansum(urine_stim_deg) - np.nansum(control_stim_deg)) / (np.nansum(urine_stim_deg) + np.nansum(control_stim_deg))
     else:
         deg_calc = None
     return dlc_calc, deg_calc
@@ -73,11 +73,11 @@ def total_inv_time(metadata, parameter_df, dlc=True, deg=True):
     
     exp_or_hab, urine_stim, control_stim, urine_stim_deg, control_stim_deg = get_paradigm(metadata, parameter_df)
     if dlc:
-        dlc_calc = (sum(urine_stim) + sum(control_stim)) / len(urine_stim) * 100
+        dlc_calc = (np.nansum(urine_stim) + np.nansum(control_stim)) / np.count_nonzero(~np.isnan(urine_stim)) * 100
     else:
         dlc_calc = None
     if deg:
-        deg_calc = (sum(urine_stim_deg) + sum(control_stim_deg)) / len(urine_stim_deg) * 100
+        deg_calc = (np.nansum(urine_stim_deg) + np.nansum(control_stim_deg)) / np.count_nonzero(~np.isnan(urine_stim_deg)) * 100
     else: 
         deg_calc = None
     return dlc_calc, deg_calc
@@ -103,7 +103,7 @@ def full_immobile_time(parameter_df):
     """
     immobile_time = parameter_df["is_immobile"]
     immobile_time = np.array(immobile_time)
-    immobile_time = np.nansum(immobile_time)/len(immobile_time) * 100
+    immobile_time = np.nansum(immobile_time)/np.count_nonzero(~np.isnan(immobile_time)) * 100
     return immobile_time
 
 
