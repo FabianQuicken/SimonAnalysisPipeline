@@ -13,6 +13,7 @@ from calculate_parameters import distance_travelled, calculate_speed, distance_b
 from further_processing import percent_of_total_inv_time, disc_index, total_inv_time, median_speed, full_distance, full_immobile_time
 from get_parameters import find_parameter_file
 from configurations import dlc_petridish_layout_fabi
+from move_file import move_file
 
 """
 !!! HOW TO USE THE CODE !!!
