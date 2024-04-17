@@ -83,7 +83,7 @@ def pieplot(metadata, data_list, save_name=str, colors=["m","y"], labels=[]):
     plt.show()
 
 def plot_cum_dist(metadata, arr, save_name=str, color=str):
-
+    print(arr)
     plt.figure(figsize=(6,6))
     arr = arr[~np.isnan(arr)]
     cum_dist = np.cumsum(arr)

@@ -73,9 +73,16 @@ for file in tqdm(file_list):
               colors=["m","y"],
               skip_frame_stepsize=4)
     
-    #pieplot(metadata=metadata,data_list=[is_left,is_right], save_name="side_preference",colors=["m","y"],labels=["is left", "is right"])
+    eventplot(metadata=metadata,
+              save_name="immobile_behavior",
+              data_list=[is_immobile],
+              lineoffsets=["is_immobile"],
+              colors=['b'],
+              skip_frame_stepsize=20)
+    
+    pieplot(metadata=metadata,data_list=[is_left,is_right], save_name="side_preference",colors=["m","y"],labels=["is left", "is right"])
 
-    #plot_cum_dist(metadata=metadata,arr=distance, save_name="dist_travelled", color='m')
+    plot_cum_dist(metadata=metadata,arr=distance, save_name="dist_travelled", color='m')
 
     plot_distance_val(metadata=metadata, data_list=[distance_to_leftdish, distance_to_rightdish], colors=['m', 'y'],save_name='dish_distances',labels=['leftdish', 'rightdish'])
     
