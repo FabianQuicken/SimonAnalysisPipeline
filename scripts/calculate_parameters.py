@@ -80,7 +80,6 @@ def distance_travelled(df,bodypart=str):
     bodypart_y = data[bodypart+"_y"]
 
     bodypart_x = np.array(bodypart_x) #transforms bodypart data into np array for easier calculation
-    print("distance travelled:\n")
     bodypart_y = np.array(bodypart_y)
 
     distance_values = np.zeros((len(bodypart_x)))
@@ -89,6 +88,7 @@ def distance_travelled(df,bodypart=str):
                                                 y1=bodypart_y[i],
                                                 x2=bodypart_x[i+1],
                                                 y2=bodypart_y[i+1])
+        
         distance_values[i] = distance_values[i] / (pixel_per_cm*100) # umrechnung in meter
     return distance_values
 
@@ -100,13 +100,15 @@ def calculate_speed(distance_array,fps=60):
     """
     print("\nGet speed values...")
     #distance_values = np.array(parameter_df["distance"])
-    distance_values = distance_array
+    distance_values = distance_array.copy()
     for i in range(len(distance_values)):
         distance_values[i]=((distance_values[i]*fps))*3.6 #changing m/s to km/h
     speed_between_frames = distance_values
+    """
     for i in range(len(speed_between_frames)-1):
         if speed_between_frames[i] > 50:
             speed_between_frames[i] = np.nan
+    """
     return speed_between_frames
 
 
@@ -184,6 +186,7 @@ def distance_bodypart_bodypart(df, bodypart_1=str, bodypart_2=str):
 
 
 def investigation_time(distance_values, factor = 1):
+    distance_values = distance_values.copy()
     pixel_per_cm = 34.77406
     radius_threshold = factor * pixel_per_cm
     is_investigating = np.zeros((len(distance_values)))
@@ -195,6 +198,7 @@ def investigation_time(distance_values, factor = 1):
     return is_investigating, factor
 
 def immobile_time(speed_values, immobile_threshold = 0.1):
+    speed_values = speed_values.copy()
     print("\nGet immobile time...")
     is_immobile = np.zeros((len(speed_values)))
     for i in range(len(speed_values)-1):

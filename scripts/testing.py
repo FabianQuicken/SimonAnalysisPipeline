@@ -30,7 +30,9 @@ for file in tqdm(file_list):
     
     # getting all the parameters from the DLC Data
     distance = distance_travelled(df = new_df, bodypart = "center")
-    speed = calculate_speed(distance)
+
+   
+    speed = calculate_speed(distance_array=distance)
     is_immobile, immobile_threshold = immobile_time(speed_values=speed)
     distance_to_leftdish = distance_bodypart_object(df=new_df,bodypart="nose",object="left_dish")
     distance_to_rightdish = distance_bodypart_object(df=new_df,bodypart="nose",object="right_dish")
@@ -39,7 +41,6 @@ for file in tqdm(file_list):
     is_investigating_left, factor = investigation_time(distance_to_leftdish,factor=2.2)
     print("\nGet dish investigation right...")
     is_investigating_right, factor = investigation_time(distance_to_rightdish,factor=2.2)
-
     # adding array containing information about the radius used for petridish investigation 
     radius_petridish = np.zeros(len(is_investigating_left))
     for i in range(len(radius_petridish)-1):
@@ -48,7 +49,6 @@ for file in tqdm(file_list):
     immobile_speeds = np.zeros(len(is_immobile))
     for i in range(len(immobile_speeds)-1):
         immobile_speeds[i] = immobile_threshold
-
     # write parameters into a dic; new calculations need to be appended manually
     parameters = {"distance_travelled_center[cm]":distance,
                 "speed[km/h]":speed,
@@ -62,10 +62,10 @@ for file in tqdm(file_list):
                 "is_investigating_rightdish": is_investigating_right,
                 "petridish_investigation_radius[cm]": radius_petridish
                 }
-
+    print(np.nanmean(speed))
     
     # AB HIER TESTCODE FÜR FIGURES
-
+    """
     eventplot(metadata=metadata,
               save_name="investigation_behavior", 
               data_list=[is_investigating_left, is_investigating_right], 
@@ -73,7 +73,18 @@ for file in tqdm(file_list):
               colors=["m","y"],
               skip_frame_stepsize=4)
     
+<<<<<<< HEAD
     pieplot(metadata=metadata,data_list=[is_left,is_right], save_name="side_preference",colors=["m","y"],labels=["is left", "is right"])
+=======
+    eventplot(metadata=metadata,
+              save_name="immobile_behavior",
+              data_list=[is_immobile],
+              lineoffsets=["is_immobile"],
+              colors=['b'],
+              skip_frame_stepsize=20)
+    """    
+    #pieplot(metadata=metadata,data_list=[is_left,is_right], save_name="side_preference",colors=["m","y"],labels=["is left", "is right"])
+>>>>>>> 348eccc72d5e4f5227c5b09febe1170589657837
 
     plot_cum_dist(metadata=metadata,arr=distance, save_name="dist_travelled", color='m')
 
