@@ -73,14 +73,23 @@ for file in tqdm(file_list):
               colors=["m","y"],
               skip_frame_stepsize=4)
     
+<<<<<<< HEAD
+    pieplot(metadata=metadata,data_list=[is_left,is_right], save_name="side_preference",colors=["m","y"],labels=["is left", "is right"])
+=======
     eventplot(metadata=metadata,
               save_name="immobile_behavior",
               data_list=[is_immobile],
               lineoffsets=["is_immobile"],
               colors=['b'],
               skip_frame_stepsize=20)
+<<<<<<< HEAD
        
     pieplot(metadata=metadata,data_list=[is_left,is_right], save_name="side_preference",colors=["m","y"],labels=["is left", "is right"])
+=======
+    """    
+    #pieplot(metadata=metadata,data_list=[is_left,is_right], save_name="side_preference",colors=["m","y"],labels=["is left", "is right"])
+>>>>>>> 348eccc72d5e4f5227c5b09febe1170589657837
+>>>>>>> 7920712da855c42f21ea637650195327a76e9e18
 
     plot_cum_dist(metadata=metadata,arr=distance, save_name="dist_travelled", color='m')
 
