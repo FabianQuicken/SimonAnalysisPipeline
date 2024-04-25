@@ -83,35 +83,12 @@ for file in tqdm(file_list):
               colors=['b'],
               skip_frame_stepsize=20)
 
-       
-    pieplot(metadata=metadata,data_list=[is_left,is_right], save_name="side_preference",colors=["m","y"],labels=["is left", "is right"])
-  
-    #pieplot(metadata=metadata,data_list=[is_left,is_right], save_name="side_preference",colors=["m","y"],labels=["is left", "is right"])
-
 
     plot_cum_dist(metadata=metadata,arr=distance, save_name="dist_travelled", color='m')
 
     plot_distance_val(metadata=metadata, data_list=[distance_to_leftdish, distance_to_rightdish], colors=['m', 'y'],save_name='dish_distances',labels=['leftdish', 'rightdish'])
-    
 
     
-    """
-    print(len(is_investigating_left))
-    plt.figure(figsize=(10,6))
-    data_left = np.where(is_investigating_left == 1)[0]
-    print(len(data_left))
-    data_right = np.where(is_investigating_right == 1)[0]
-    data_left_norm = (data_left / len(is_investigating_left))
-    data_right_norm = (data_right / len(is_investigating_right))
-    plt.eventplot(data_left_norm, lineoffsets="left", colors="b") 
-    plt.eventplot(data_right_norm, lineoffsets="right", colors="r")
-    plt.xlim(0, 1)
-    #plt.legend()
-    plt.xlabel('Video duration')
-    plt.title(f"Mouse: {metadata['mouse']}; Paradigm: {metadata['paradigm']}; Date: {metadata['date']}")
-    plt.savefig(f"./testing/{metadata['date']}_{metadata['mouse']}_{metadata['paradigm']}.svg", format='svg')
-    plt.show()
-    """
     
 
     
