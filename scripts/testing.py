@@ -67,9 +67,9 @@ for file in tqdm(file_list):
     # AB HIER TESTCODE FÜR FIGURES
     
     eventplot(metadata=metadata,
-              save_name="investigation_behavior", 
+              save_name=f"investigation_behavior_{factor}cm_radius", 
               data_list=[is_investigating_left, is_investigating_right], 
-              lineoffsets=["investigate left dish", "investigate right dish"],
+              lineoffsets=["dlc left dish", "dlc right dish"],
               colors=["m","y"],
               skip_frame_stepsize=4)
     
@@ -87,6 +87,44 @@ for file in tqdm(file_list):
     plot_cum_dist(metadata=metadata,arr=distance, save_name="dist_travelled", color='m')
 
     plot_distance_val(metadata=metadata, data_list=[distance_to_leftdish, distance_to_rightdish], colors=['m', 'y'],save_name='dish_distances',labels=['leftdish', 'rightdish'])
+
+# # # # Start: Get data from DeepEthogram, append it to the respective parameters files # # # #
+
+# define the paths and get the deg files
+deg_path = "./testing/deg_raw/*"
+deg_path_done = "./raw/deg_done/"
+deg_file_list = glob.glob(deg_path)
+
+# get all possible parameter paths
+parameter_new_path = "./processed/parameters/new/*"
+parameter_new_list = glob.glob(parameter_new_path)
+parameter_done_path = "./processed/parameters/done/*"
+parameter_done_list = glob.glob(parameter_done_path)
+parameter_full_list = parameter_new_list + parameter_done_list
+
+for deg_file in tqdm(deg_file_list):
+    time.sleep(0.5)
+
+    # get the DeepEthogram dataframe and the matching parameter_df
+    deg_metadata = get_metadata(deg_file)
+    deg_df = pd.read_csv(deg_file)
+    parameter_df, parameter_df_path = find_parameter_file(deg_file=deg_file, metadata_dic=deg_metadata, parameter_paths=parameter_full_list)
+
+    # append DeepEthogram data to the parameter_df
+    parameter_df["deg_is_investigating_leftdish"] = np.array(deg_df["leftsniffing"])
+    parameter_df["deg_is_investigating_rightdish"] = np.array(deg_df["rightsniffing"])
+
+    eventplot(metadata=deg_metadata,
+              save_name="investigation_behavior", 
+              data_list=[deg_df["leftsniffing"], deg_df["rightsniffing"]], 
+              lineoffsets=["deg sniff left dish", "def sniff right dish"],
+              colors=["m","y"],
+              skip_frame_stepsize=4)
+
+
+    
+    
+# # # # End: Get data from DeepEthogram, append it to the respective parameters files # # # #
 
     
     
