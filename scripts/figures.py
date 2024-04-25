@@ -2,6 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np 
 import seaborn as sns
 import pandas as pd
+from mathematics import fill_missing_values
 
 def normalize(data_list, normalize_val, skip_frame_stepsize):
     """
@@ -107,6 +108,8 @@ def plot_cum_dist(metadata, arr, save_name=str, color=str):
 def plot_distance_val(metadata, data_list=list, save_name=str, colors=list , labels=list, skip_frame_stepsize=40):
     plt.figure(figsize=(14,6))
     time_points = np.arange(len(data_list[0]))
+    for i in range(len(data_list)):
+        data_list[i] = fill_missing_values(data_list[i])
     for i in range(len(data_list)):
         data_list[i] = data_list[i][::skip_frame_stepsize]
     time_points = time_points[::skip_frame_stepsize]

@@ -65,7 +65,7 @@ for file in tqdm(file_list):
     print(np.nanmean(speed))
     
     # AB HIER TESTCODE FÜR FIGURES
-    """
+    
     eventplot(metadata=metadata,
               save_name="investigation_behavior", 
               data_list=[is_investigating_left, is_investigating_right], 
@@ -79,8 +79,8 @@ for file in tqdm(file_list):
               lineoffsets=["is_immobile"],
               colors=['b'],
               skip_frame_stepsize=20)
-    """    
-    #pieplot(metadata=metadata,data_list=[is_left,is_right], save_name="side_preference",colors=["m","y"],labels=["is left", "is right"])
+       
+    pieplot(metadata=metadata,data_list=[is_left,is_right], save_name="side_preference",colors=["m","y"],labels=["is left", "is right"])
 
     plot_cum_dist(metadata=metadata,arr=distance, save_name="dist_travelled", color='m')
 

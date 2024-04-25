@@ -23,3 +23,11 @@ def euklidean_distance(x1, y1, x2, y2):
         
     return distance
 
+def fill_missing_values(array):
+    """
+    Replacing np.nans with a linear interpolation. Takes and returns an array.
+    """
+    nan_indices = np.isnan(array)
+    array[nan_indices] = np.interp(np.flatnonzero(nan_indices), np.flatnonzero(~nan_indices), array[~nan_indices])
+    return array
+
