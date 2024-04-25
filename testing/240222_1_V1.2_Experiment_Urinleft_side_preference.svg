@@ -6,15 +6,7 @@
   <rdf:RDF xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
    <cc:Work>
     <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
-<<<<<<< HEAD
-    <dc:date>2024-04-25T17:30:26.747461</dc:date>
-=======
-<<<<<<< HEAD
-    <dc:date>2024-04-12T10:03:49.700434</dc:date>
-=======
-    <dc:date>2024-04-17T08:34:31.542949</dc:date>
->>>>>>> 348eccc72d5e4f5227c5b09febe1170589657837
->>>>>>> 7920712da855c42f21ea637650195327a76e9e18
+    <dc:date>2024-04-25T17:35:14.912760</dc:date>
     <dc:format>image/svg+xml</dc:format>
     <dc:creator>
      <cc:Agent>
