@@ -3,7 +3,7 @@ networks = ("resnet50_dlc1feb20shuffle1_300000", "notavailableyet")
 paradigms = ("habituation_urinright", "experiment_urinright", "habituation_urinleft", "experiment_urinleft",
              "habituation1", "habituation2", "habituation3", "habituation4", "habituation5", "habituation6")
 cameras = ("top", "side, topview, sideview")
-dlc_petridish_layout = ("nose_x", "nose_y", "nose_likelihood",
+dlc_petridish_layout_simon = ("nose_x", "nose_y", "nose_likelihood",
                   "left_ear_x", "left_ear_y", "left_ear_likelihood",
                   "right_ear_x", "right_ear_y", "right_ear_likelihood",
                   "lateral_left_x", "lateral_left_y", "lateral_left_likelihood",
@@ -32,3 +32,18 @@ dlc_petridish_layout_fabi = ("leftear_x", "leftear_y", "leftear_likelihood",
                         "leftpetridish_x", "leftpetridish_y", "leftpetridish_likelihood",
                         "rightpetridish_x", "rightpetridish_y", "rightpetridish_likelihood"
                         )
+
+dlc_mighty_snicket_layout_simon = ("nose_x", "nose_y", "nose_likelihood",
+                  "left_ear_x", "left_ear_y", "left_ear_likelihood",
+                  "right_ear_x", "right_ear_y", "right_ear_likelihood",
+                  "lateral_left_x", "lateral_left_y", "lateral_left_likelihood",
+                  "center_x", "center_y", "center_likelihood",
+                  "lateral_right_x", "lateral_right_y", "lateral_right_likelihood",
+                  "tailbase_x", "tailbase_y", "tailbase_likelihood",
+                  "left_snicket_x", "left_snicket_y", "left_snicket_likelihood",
+                  "right_snicket_x", "right_snicket_y", "right_snicket_likelihood",
+                  "topleft_x", "topleft_y", "topleft_likelihood",
+                  "topright_x", "topright_y", "topright_likelihood",
+                  "bottomleft_x", "bottomleft_y", "bottomleft_likelihood",
+                  "bottomright_x", "bottomright_y", "bottomright_likelihood"
+                  )

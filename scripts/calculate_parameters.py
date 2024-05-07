@@ -206,7 +206,7 @@ def immobile_time(speed_values, immobile_threshold = 0.1):
             is_immobile[i] = 1
         elif np.isnan(speed_values[i]):
             is_immobile[i] = np.nan
-    return is_immobile, immobile_threshold
+    return is_immobile
 
 
 
