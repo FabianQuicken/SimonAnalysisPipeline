@@ -1,27 +1,27 @@
 import numpy as np
 import statistics
 
-def get_paradigm(metadata, parameter_df):
+def get_paradigm(metadata, parameter_df, left_obj, right_obj):
     if "habituation" in metadata["paradigm"].lower():
         exp_or_hab = "habituation"
     elif "experiment" in metadata["paradigm"].lower():
         exp_or_hab = "experiment"
 
     if "right" in metadata["paradigm"]:
-        urine_stim = parameter_df["is_investigating_rightdish"]
-        control_stim = parameter_df["is_investigating_leftdish"]
+        urine_stim = parameter_df[f"is_investigating_{right_obj}"]
+        control_stim = parameter_df[f"is_investigating_{left_obj}"]
         try:
-            urine_stim_deg = parameter_df["deg_is_investigating_rightdish"]
-            control_stim_deg = parameter_df["deg_is_investigating_leftdish"]
+            urine_stim_deg = parameter_df[f"deg_is_investigating_{right_obj}"]
+            control_stim_deg = parameter_df[f"deg_is_investigating_{left_obj}"]
         except:
             print("No deg data available.")
         
     elif "left" in metadata["paradigm"]:
-        urine_stim = parameter_df["is_investigating_leftdish"]
-        control_stim = parameter_df["is_investigating_rightdish"]
+        urine_stim = parameter_df[f"is_investigating_{left_obj}"]
+        control_stim = parameter_df[f"is_investigating_{right_obj}"]
         try:
-            urine_stim_deg = parameter_df["deg_is_investigating_leftdish"]
-            control_stim_deg = parameter_df["deg_is_investigating_rightdish"]
+            urine_stim_deg = parameter_df[f"deg_is_investigating_{left_obj}"]
+            control_stim_deg = parameter_df[f"deg_is_investigating_{right_obj}"]
         except:
             print("No deg data available.")
         
@@ -41,9 +41,9 @@ def get_paradigm(metadata, parameter_df):
 
 
 
-def percent_of_total_inv_time(metadata, parameter_df, dlc=True, deg=True):
+def percent_of_total_inv_time(metadata, parameter_df, left_obj, right_obj, dlc=True, deg=True):
 
-    exp_or_hab, urine_stim, control_stim, urine_stim_deg, control_stim_deg = get_paradigm(metadata, parameter_df)
+    exp_or_hab, urine_stim, control_stim, urine_stim_deg, control_stim_deg = get_paradigm(metadata, parameter_df, left_obj, right_obj)
     if dlc:
         dlc_calc = np.nansum(urine_stim) / ((np.nansum(urine_stim) + np.nansum(control_stim))) * 100
     else:
@@ -56,9 +56,9 @@ def percent_of_total_inv_time(metadata, parameter_df, dlc=True, deg=True):
     return dlc_calc, deg_calc, exp_or_hab
 
 
-def disc_index(metadata, parameter_df, dlc=True, deg=True):
+def disc_index(metadata, parameter_df, left_obj, right_obj, dlc=True, deg=True):
 
-    exp_or_hab, urine_stim, control_stim, urine_stim_deg, control_stim_deg = get_paradigm(metadata, parameter_df)
+    exp_or_hab, urine_stim, control_stim, urine_stim_deg, control_stim_deg = get_paradigm(metadata, parameter_df, left_obj, right_obj)
     if dlc:
         dlc_calc = (np.nansum(urine_stim) - np.nansum(control_stim)) / (np.nansum(urine_stim) + np.nansum(control_stim))
     else:
@@ -69,9 +69,9 @@ def disc_index(metadata, parameter_df, dlc=True, deg=True):
         deg_calc = None
     return dlc_calc, deg_calc
 
-def total_inv_time(metadata, parameter_df, dlc=True, deg=True):
+def total_inv_time(metadata, parameter_df, left_obj, right_obj, dlc=True, deg=True):
     
-    exp_or_hab, urine_stim, control_stim, urine_stim_deg, control_stim_deg = get_paradigm(metadata, parameter_df)
+    exp_or_hab, urine_stim, control_stim, urine_stim_deg, control_stim_deg = get_paradigm(metadata, parameter_df, left_obj, right_obj)
     if dlc:
         dlc_calc = (np.nansum(urine_stim) + np.nansum(control_stim)) / np.count_nonzero(~np.isnan(urine_stim)) * 100
     else:
@@ -92,9 +92,9 @@ def full_distance(parameter_df):
     """
     returns the distance travelled per minute
     """
-    distance_travelled = parameter_df["distance_travelled_center"]
+    distance_travelled = parameter_df["distance_travelled_center_in_m"]
     distance_travelled = np.array(distance_travelled)
-    distance = np.nansum(distance_travelled)/len(distance_travelled) * 36000 / 100
+    distance = np.nansum(distance_travelled)/np.count_nonzero(~np.isnan(distance_travelled)) * 3600
     return distance
 
 def full_immobile_time(parameter_df):

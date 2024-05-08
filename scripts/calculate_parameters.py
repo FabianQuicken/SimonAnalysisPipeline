@@ -16,10 +16,10 @@ def time_spent_sides(df,bodypart=str,edge_left=str, edge_right=str):
     print("Filtering for a good petridish prediction...")
     data = likelihood_filtering(df=data, 
                                 likelihood_row_name=edge_left+"_likelihood",
-                                filter_val=0.99)
+                                filter_val=0.95)
     data = likelihood_filtering(df=data, 
                                 likelihood_row_name=edge_right+"_likelihood",
-                                filter_val=0.99)    
+                                filter_val=0.95)    
     edge_left_x = data[edge_left+"_x"]
     edge_right_x = data[edge_right+"_x"]
     
@@ -132,7 +132,7 @@ def distance_bodypart_object(df, bodypart=str, object=str):
     print("Filtering for a good object prediction...")
     data = likelihood_filtering(df=data, 
                                 likelihood_row_name=object+"_likelihood",
-                                filter_val=0.99)
+                                filter_val=0.95)
     object_x = data[object+"_x"]
     object_y = data[object+"_y"]
 

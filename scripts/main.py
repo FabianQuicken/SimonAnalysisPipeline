@@ -12,7 +12,7 @@ from save_to_csv import metadata_bodyparts_to_csv, parameters_to_csv, ini_proces
 from calculate_parameters import distance_travelled, calculate_speed, distance_bodypart_object,time_spent_sides,investigation_time,immobile_time
 from further_processing import percent_of_total_inv_time, disc_index, total_inv_time, median_speed, full_distance, full_immobile_time
 from get_parameters import find_parameter_file
-from configurations import dlc_petridish_layout_fabi
+from configurations import dlc_petridish_layout_fabi, dlc_petridish_layout_simon
 from move_file import move_file
 
 """
@@ -54,7 +54,7 @@ file_list = glob.glob(path)
 for file in tqdm(file_list):
     time.sleep(0.5)
 
-    df = rewrite_dataframe(csv_file_path=file) # rewrites the dataframe of dlc for easier readibility
+    df = rewrite_dataframe(csv_file_path=file, df_cols=dlc_petridish_layout_simon) # rewrites the dataframe of dlc for easier readibility
     metadata = get_metadata(csv_file_path=file) # get metadata from the file name
     # new df only containing bodypart data used for calculations
     new_df = get_bodypart(df_all_bp=df,bodypart_list=["nose", "left_dish", "right_dish", "center", "topleft", "topright"])  
