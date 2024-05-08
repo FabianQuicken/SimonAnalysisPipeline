@@ -14,6 +14,7 @@ from further_processing import percent_of_total_inv_time, disc_index, total_inv_
 from get_parameters import find_parameter_file
 from configurations import dlc_petridish_layout_fabi, dlc_petridish_layout_simon, dlc_mighty_snicket_layout_simon
 from split_exp_hab import split_csv, split_csv_chatgpt
+from figures import eventplot, pieplot, plot_cum_dist, plot_distance_val
 
 #from move_file import move_file
 
@@ -21,7 +22,7 @@ from split_exp_hab import split_csv, split_csv_chatgpt
 # # # # Define your experiment here # # # #
 
 # define the project path - head directory of your specific dataset, that should be analyzed similarly
-project_path = "./datasets/testing"
+project_path = "./datasets/SH_mighty_snicket_female_urine"
 left_obj = "left_snicket"
 right_obj = "right_snicket"
 
@@ -90,6 +91,7 @@ if run_postprocessing:
     # should the parameter file be moved in the 'done' directory?
     move_para_file = True
 
+make_plots = False
 
 # for 20min videos: split csv files in habituation and experiment files...
 cut_dlc = False
@@ -306,3 +308,46 @@ if run_postprocessing:
 
 # # # # End: Take processed (parameter) data, calculate metrics, save metrics of similar paradigm recordings in one csv  # # # #
 
+if make_plots:
+
+    path_parameters = f"{project_path}/processed/parameters/done/*.csv"
+    path_save_figs = f"{project_path}/figures/"
+    file_list_parameters = glob.glob(path_parameters)
+
+    for file in tqdm(file_list_parameters):
+        print(f"Working on file: {file}")
+        time.sleep(0.2)
+
+        metadata = get_metadata(csv_file_path=file)
+        parameters_df = pd.read_csv(file)
+
+
+        
+        eventplot(metadata=metadata,
+                save_name=f"investigation_behavior_{factor}cm_radius", 
+                data_list=[is_investigating_left, is_investigating_right], 
+                lineoffsets=["dlc left dish", "dlc right dish"],
+                colors=["m","y"],
+                skip_frame_stepsize=4)
+        
+
+        pieplot(metadata=metadata,data_list=[is_left,is_right], save_name="side_preference",colors=["m","y"],labels=["is left", "is right"])
+
+        eventplot(metadata=metadata,
+                save_name="immobile_behavior",
+                data_list=[is_immobile],
+                lineoffsets=["is_immobile"],
+                colors=['b'],
+                skip_frame_stepsize=20)
+
+
+        plot_cum_dist(metadata=metadata,arr=distance, save_name="dist_travelled", color='m')
+
+        plot_distance_val(metadata=metadata, data_list=[distance_to_leftdish, distance_to_rightdish], colors=['m', 'y'],save_name='dish_distances',labels=['leftdish', 'rightdish'])
+
+        eventplot(metadata=deg_metadata,
+                save_name="investigation_behavior", 
+                data_list=[deg_df["leftsniffing"], deg_df["rightsniffing"]], 
+                lineoffsets=["deg sniff left dish", "def sniff right dish"],
+                colors=["m","y"],
+                skip_frame_stepsize=4)
