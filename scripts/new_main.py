@@ -22,19 +22,19 @@ from figures import eventplot, pieplot, plot_cum_dist, plot_distance_val
 # # # # Define your experiment here # # # #
 
 # define the project path - head directory of your specific dataset, that should be analyzed similarly
-project_path = "./datasets/SH_mighty_snicket_female_urine"
-left_obj = "left_snicket"
-right_obj = "right_snicket"
+project_path = "./datasets/SH_petridishes_female_urine_new"
+# what objects were labelled?
+left_obj = "left_dish"
+right_obj = "right_dish"
 
 # do you want to process dlc csv files?
 dlc_analysis = False
 if dlc_analysis:
     # the dlc layout contains information about the column names of the bodyparts
-    dlc_layout = dlc_mighty_snicket_layout_simon
-    
+    dlc_layout = dlc_petridish_layout_simon
 
     # define the bodyparts you want to extract out of the df for further calculations
-    used_bodyparts = ["nose", "left_snicket", "right_snicket", "center", "topleft", "topright"]
+    used_bodyparts = ["nose", "left_dish", "right_dish", "center", "topleft", "topright"]
 
 
     calc_distance_and_speed = True
@@ -43,14 +43,13 @@ if dlc_analysis:
 
     calc_immobile_time = True
     # below what speed threshold [km/h] the animal is defined immobile?
-    immobile_threshold = 0.1
+    immobile_threshold = 0.05
 
     calc_dist_left_object = True
     calc_dist_right_object = True
-    # what bodypart and object are used for distance calculation?
+    # what bodypart is used for distance calculation?
     obj_dist_bodypart = "nose"
-    left_obj = "left_snicket"
-    right_obj = "right_snicket"
+
     # do you want to calculate investigation behavior based on the distance?
     calc_inv_time = True
 
@@ -79,8 +78,8 @@ if add_deg_data:
     deg_behavior2 = "rightsniffing"
 
     # how should the column be indexed in the parameter files?
-    behavior1_index = "deg_is_investigating_left_snicket"
-    behavior2_index = "deg_is_investigating_right_snicket"
+    behavior1_index = "deg_is_investigating_left_dish"
+    behavior2_index = "deg_is_investigating_right_dish"
 
     # do you want to move the deg_csvs to the 'done' directory?
     move_deg_csv = True
