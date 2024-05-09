@@ -22,24 +22,24 @@ from figures import eventplot, pieplot, plot_cum_dist, plot_distance_val
 # # # # Define your experiment here # # # #
 
 # define the project path - head directory of your specific dataset, that should be analyzed similarly
-project_path = "./datasets/SH_petridishes_female_urine_new"
+project_path = "./datasets/FQ_petridishes_female_urine"
 # what objects were labelled?
-left_obj = "left_dish"
-right_obj = "right_dish"
+left_obj = "leftpetridish"
+right_obj = "rightpetridish"
 
 # do you want to process dlc csv files?
 dlc_analysis = False
 if dlc_analysis:
     # the dlc layout contains information about the column names of the bodyparts
-    dlc_layout = dlc_petridish_layout_simon
+    dlc_layout = dlc_petridish_layout_fabi
 
     # define the bodyparts you want to extract out of the df for further calculations
-    used_bodyparts = ["nose", "left_dish", "right_dish", "center", "topleft", "topright"]
+    used_bodyparts = ["snout", "leftpetridish", "rightpetridish", "centroid", "topleft", "topright"]
 
 
     calc_distance_and_speed = True
     # what bodypart do you want to use for distance and speed calculation?
-    distance_bodypart = "center"
+    distance_bodypart = "centroid"
 
     calc_immobile_time = True
     # below what speed threshold [km/h] the animal is defined immobile?
@@ -48,14 +48,14 @@ if dlc_analysis:
     calc_dist_left_object = True
     calc_dist_right_object = True
     # what bodypart is used for distance calculation?
-    obj_dist_bodypart = "nose"
+    obj_dist_bodypart = "snout"
 
     # do you want to calculate investigation behavior based on the distance?
     calc_inv_time = True
 
     calc_side_pref = True
     # give the bodypart that is checked for sidepref
-    side_pref_bodypart = "center"
+    side_pref_bodypart = "centroid"
     # give two coordinates that define the edges of the arena
     # will be used to 'draw' a center line 
     left_edge = "topleft"
@@ -71,11 +71,11 @@ if dlc_analysis:
     move_raw_csv = True
 
 # do you want to add deg data to existing parameter files?
-add_deg_data = False
+add_deg_data = True
 if add_deg_data:
     # how are deg behaviors labelled?
-    deg_behavior1 = "leftsniffing"
-    deg_behavior2 = "rightsniffing"
+    deg_behavior1 = '"SniffLeftDish'
+    deg_behavior2 = 'SniffRightDish"'
 
     # how should the column be indexed in the parameter files?
     behavior1_index = "deg_is_investigating_left_dish"
@@ -85,7 +85,7 @@ if add_deg_data:
     move_deg_csv = True
 
 # do you want to do postprocessing?
-run_postprocessing = True
+run_postprocessing = False
 if run_postprocessing:
     # should the parameter file be moved in the 'done' directory?
     move_para_file = True
@@ -241,8 +241,14 @@ if add_deg_data:
         parameter_df, parameter_df_path = find_parameter_file(deg_file=deg_file, metadata_dic=deg_metadata, parameter_paths=parameter_full_list)
 
         # append DeepEthogram data to the parameter_df
-        parameter_df[behavior1_index] = np.array(deg_df[deg_behavior1])
-        parameter_df[behavior2_index] = np.array(deg_df[deg_behavior2])
+        try:
+            parameter_df[behavior1_index] = np.array(deg_df[deg_behavior1])
+            parameter_df[behavior2_index] = np.array(deg_df[deg_behavior2])
+        except:
+            print("WARNING: DEG behavior lenght did not match the DLC data !!!!")
+            parameter_df = parameter_df.reindex(range(len(deg_df[deg_behavior2])))
+            parameter_df[behavior1_index] = np.array(deg_df[deg_behavior1])
+            parameter_df[behavior2_index] = np.array(deg_df[deg_behavior2])
 
         # save the new parameter_df to the same file
         parameter_df.to_csv(parameter_df_path)

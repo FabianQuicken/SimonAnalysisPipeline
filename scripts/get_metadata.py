@@ -35,6 +35,12 @@ def get_metadata(csv_file_path):
         paradigm = parts[3] + "_" + parts[4]
     else:
         paradigm = parts[3]+"_"+parts[4]+"_"+parts[5]
+    
+    if parts[0] == "topview" or parts[0] == "sideview":
+        date = parts[3]
+        camera = parts [0]
+        mouse = parts [2]
+        paradigm = parts[1] + "_" + parts[4][:-3]
     return {"date": date,
             "camera": camera,
             "mouse": mouse,

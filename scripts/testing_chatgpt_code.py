@@ -1,12 +1,19 @@
+import pandas as pd
 import numpy as np
 
+# Existing DataFrame
+df = pd.DataFrame({
+    'A': [1, 2, 3],
+    'B': [4, 5, 6]
+})
 
-def fill_missing_values(array):
-    nan_indices = np.isnan(array)
-    array[nan_indices] = np.interp(np.flatnonzero(nan_indices), np.flatnonzero(~nan_indices), array[~nan_indices])
-    return array
+# New array to add as a column
+new_data = [10, 20, 30, 40]  # Array length is 4, while DataFrame index length is 3
 
-# Example usage:
-array = np.array([1, 1.2, 0.3, np.nan, np.nan, np.nan, 0.8])
-filled_array = fill_missing_values(array)
-print(filled_array)
+# Reindex the DataFrame with a new index matching the length of new_data
+df = df.reindex(range(len(new_data)))
+
+# Assign the new array as a new column
+df['C'] = new_data
+
+print(df)
