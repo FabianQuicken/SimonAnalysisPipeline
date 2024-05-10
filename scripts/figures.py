@@ -259,18 +259,15 @@ def plot_multiple_line_plots(data, mice, dates, paradigm, save_path, sort_for_mo
     
 
     
-def plot_multiple_line_plots_chatgpt(data, paradigm, sort_for_mouse=False, mouse=str):
+def plot_multiple_line_plots_chatgpt(ax, data, paradigm, mouse=None):
     """
-    Plot multiple line plots on the same diagram with custom aesthetics.
+    Plot multiple line plots on the same axis with custom aesthetics.
 
     Parameters:
+    - ax: Matplotlib axis to plot on.
     - data: List of lists, each containing data points for a line plot.
     - paradigm: Name of the paradigm for plot title.
-    - sort_for_mouse: Flag to sort data by mouse (default: False).
     - mouse: Mouse identifier for plot title (optional).
-    
-    Returns:
-    - fig: Matplotlib figure object containing the plot.
     """
 
     # Create x-values (assuming 10 consecutive points)
@@ -280,7 +277,6 @@ def plot_multiple_line_plots_chatgpt(data, paradigm, sort_for_mouse=False, mouse
     colors = plt.cm.magma(np.linspace(0, 1, len(data)))  # Generate colors based on number of lines
 
     # Plot line plots for each dataset with custom colors
-    fig, ax = plt.subplots(figsize=(10, 8))  # Create figure and axis
     for i, data_points in enumerate(data):
         ax.plot(x_values, data_points, label=f'CSV {i+1}', color=colors[i])  # Plot with custom color
 
@@ -293,13 +289,5 @@ def plot_multiple_line_plots_chatgpt(data, paradigm, sort_for_mouse=False, mouse
     ax.set_ylabel('Frames with Investigation', color='white')  # Set y-axis label and text color
 
     # Customize legend position (move legend to upper right corner)
-    legend = ax.legend(loc='upper right', title='Legend', title_color='white', labelcolor='white')  # Create legend
-    legend.set_facecolor('black')  # Set legend background color to black
-    for text in legend.get_texts():
-        text.set_color('white')  # Set legend label colors
 
-    ax.grid(True, color='gray', linestyle='--', linewidth=0.5)  # Optional: add grid with custom style
     sns.despine()
-
-    # Return the figure object
-    return fig

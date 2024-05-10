@@ -5,6 +5,8 @@ import pandas as pd
 import numpy as np
 import shutil
 import os
+import matplotlib.pyplot as plt
+import seaborn as sns
 
 from get_metadata import get_metadata
 from get_bodyparts_from_DLC import rewrite_dataframe, get_bodypart
@@ -322,16 +324,16 @@ if make_plots:
                                   paradigm = "experiment",
                                   sort_for_mouse= True,
                                   mouse = "39806")
-    print(mice)
-    print(dates)
-    plot_multiple_line_plots(test, 
+    
+
+    
+    plot_multiple_line_plots(data=test,
                              mice=mice,
                              dates=dates,
-                             paradigm = "experiment_petridish",
-                             save_path= path_save_figs,
-                             sort_for_mouse =True,
-                             mouse ="39806")
-    
+                             paradigm="experiment",
+                             save_path=path_save_figs, 
+                             sort_for_mouse=True,
+                             mouse="39806")
 
 
     """
@@ -373,4 +375,19 @@ if make_plots:
                 colors=["m","y"],
                 skip_frame_stepsize=4)
 
+    """
+
+    """
+    # like this i could overlay multpile plots #
+    
+    fig, ax = plt.subplots(figsize=(10, 8))
+
+    plot_multiple_line_plots_chatgpt(ax, test, paradigm="experiment", mouse="39806")
+    plot_multiple_line_plots_chatgpt(ax, test2, paradigm="experiment", mouse="39788")
+
+    # Save the overlaid figure
+    save_path = f"{project_path}/figures/combined_plots.svg"
+    fig.savefig(save_path, format='svg', facecolor='black')  # Save the figure with black background
+
+    plt.show()  # Show the overlaid figure
     """
