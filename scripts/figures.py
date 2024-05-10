@@ -3,6 +3,7 @@ import numpy as np
 import seaborn as sns
 import pandas as pd
 from mathematics import fill_missing_values
+from get_metadata import get_metadata
 
 def normalize(data_list, normalize_val, skip_frame_stepsize):
     """
@@ -60,7 +61,7 @@ def eventplot(metadata, data_list, lineoffsets, save_name=str, colors = ["r", "b
     sns.despine()
     plt.gca().set_facecolor('black')
     plt.savefig(f"./testing/{metadata['date']}_{metadata['mouse']}_{metadata['paradigm']}_{save_name}.svg", format='svg')
-    plt.show()
+    
 
 
 def pieplot(metadata, data_list, save_name=str, colors=["m","y"], labels=[]):
@@ -81,7 +82,7 @@ def pieplot(metadata, data_list, save_name=str, colors=["m","y"], labels=[]):
     plt.pie(data_list, explode=(0.01,0.01), labels=labels, autopct='%1.1f%%', colors=colors, startangle=90)
     plt.title(f"Mouse: {metadata['mouse']}; Paradigm: {metadata['paradigm']}; Date: {metadata['date']}") 
     plt.savefig(f"./testing/{metadata['date']}_{metadata['mouse']}_{metadata['paradigm']}_{save_name}.svg", format='svg')
-    plt.show()
+    
 
 def plot_cum_dist(metadata, arr, save_name=str, color=str):
     print(np.nansum(arr))
@@ -102,7 +103,7 @@ def plot_cum_dist(metadata, arr, save_name=str, color=str):
     sns.despine()
     plt.title(f"Mouse: {metadata['mouse']}; Paradigm: {metadata['paradigm']}; Date: {metadata['date']}") 
     plt.savefig(f"./testing/{metadata['date']}_{metadata['mouse']}_{metadata['paradigm']}_{save_name}.svg", format='svg')
-    plt.show()
+    
 
 
 def plot_distance_val(metadata, data_list=list, save_name=str, colors=list , labels=list, skip_frame_stepsize=40):
@@ -136,7 +137,169 @@ def plot_distance_val(metadata, data_list=list, save_name=str, colors=list , lab
     plt.title(f"Mouse: {metadata['mouse']}; Paradigm: {metadata['paradigm']}; Date: {metadata['date']}")
     sns.despine()
     plt.savefig(f"./testing/{metadata['date']}_{metadata['mouse']}_{metadata['paradigm']}_{save_name}.svg", format='svg')
-    plt.show()
+    
+def prepare_data_line_plot(file_list, right_obj, left_obj, sort_for_mouse = False, mouse= str, paradigm = str):
 
+    all_data_points = []
+    mice = []
+    dates = []
+
+    for file in file_list:
+
+        metadata = get_metadata(file)
+        if sort_for_mouse:
+            if paradigm in metadata["paradigm"].lower() and metadata["mouse"] == mouse:
+                print(metadata["date"])
+                df = pd.read_csv(file)
+                df_copy = df.copy()
+                data_points = []
+
+                if "right" in metadata["paradigm"]:
+                    urine_stim = df_copy[f"is_investigating_{right_obj}"]
+                elif "left" in metadata["paradigm"]:
+                    urine_stim = df_copy[f"is_investigating_{left_obj}"]
+
+                mice.append(metadata["mouse"])
+                dates.append(metadata["date"])
+
+                urine_stim = np.array(urine_stim)
+                print(np.nansum(urine_stim))
+                total_length = len(urine_stim)
+                part_size = total_length // 10
+
+                for i in range(10):
+                    start_index = i * part_size
+                    end_index = (i + 1) * part_size
+                    part_sum = np.nansum(urine_stim[start_index:end_index])
+                    data_points.append(part_sum)
+
+                all_data_points.append(data_points)
+
+        else:
+            if paradigm in metadata["paradigm"].lower():
+
+                df = pd.read_csv(file)
+                df_copy = df.copy()
+                data_points = []
+
+                if "right" in metadata["paradigm"]:
+                    urine_stim = df_copy[f"is_investigating_{right_obj}"]
+                elif "left" in metadata["paradigm"]:
+                    urine_stim = df_copy[f"is_investigating_{left_obj}"]
+
+                mice.append(metadata["mouse"])
+                dates.append(metadata["date"])
+
+                urine_stim = np.array(urine_stim)
+                print(np.nansum(urine_stim))
+                total_length = len(urine_stim)
+                part_size = total_length // 10
+
+                for i in range(10):
+                    start_index = i * part_size
+                    end_index = (i + 1) * part_size
+                    part_sum = np.nansum(urine_stim[start_index:end_index])
+                    data_points.append(part_sum)
+
+                all_data_points.append(data_points)
+
+    return all_data_points, mice, dates
+
+
+
+
+def plot_multiple_line_plots(data, mice, dates, paradigm, save_path, sort_for_mouse=False, mouse=str):
+    """
+    Plot multiple line plots on the same diagram for given CSV files and column index.
+
+    Parameters:
+    - csv_files: List of file paths to CSV files.
+    - column_index: Index of the column to extract (zero-based index).
+    """
+
+
+    # Create x-values (assuming 10 consecutive points)
+    x_values = list(range(1, 11))  # Generate x-values from 1 to 10
+
+    # Define color map from yellow to purple
+    # colormaps for black background: viridis, plasma, cividis
+    colors = plt.cm.viridis(np.linspace(0, 1, len(data)))
+
+    # Plot line plots for each CSV file
+    plt.figure(figsize=(10, 8))  # Optional: set figure size
+    for i, data_points in enumerate(data):
+        plt.plot(x_values, data_points, label=f'mouse:{mice[i]}; date:{dates[i]}', color=colors[i])  # Plot each line plot with a label
+
+    # Set background color to black
+    plt.gca().set_facecolor('black')  # Set background color to black
+
+    # Add labels, title, legend, and grid
+    plt.title(f'Investigation time of mice in 1 min bins, paradigm: {paradigm}')
+    plt.xlabel('Minute')
+    plt.ylabel('Frames with investigation')
+    #plt.legend()
+    
+    #plt.grid(True, color="gray")  # Optional: add grid
+    sns.despine()
+
+    if sort_for_mouse:
+        # Customize legend position (move legend to upper right corner)
+        plt.legend(loc='upper right', bbox_to_anchor=(1.0, 1.0), labelcolor='white', facecolor="black")
+        # Adjust layout to ensure all plot elements are within the figure boundaries
+        plt.tight_layout()
+        plt.savefig(f"{save_path}{paradigm}_mouse_{mouse}.svg", format='svg', facecolor="black")
+    else:
+        # Customize legend position (move legend to the right)
+        plt.legend(loc='center left', bbox_to_anchor=(1, 0.5), title='Legend', labelcolor='black')
+        # Adjust layout to ensure all plot elements are within the figure boundaries
+        plt.tight_layout()
+        plt.savefig(f"{save_path}{paradigm}.svg", format='svg', facecolor="black")
+    plt.show()
+    
     
 
+    
+def plot_multiple_line_plots_chatgpt(data, paradigm, sort_for_mouse=False, mouse=str):
+    """
+    Plot multiple line plots on the same diagram with custom aesthetics.
+
+    Parameters:
+    - data: List of lists, each containing data points for a line plot.
+    - paradigm: Name of the paradigm for plot title.
+    - sort_for_mouse: Flag to sort data by mouse (default: False).
+    - mouse: Mouse identifier for plot title (optional).
+    
+    Returns:
+    - fig: Matplotlib figure object containing the plot.
+    """
+
+    # Create x-values (assuming 10 consecutive points)
+    x_values = np.arange(1, 11)  # Generate x-values from 1 to 10
+
+    # Define color map from yellow to purple
+    colors = plt.cm.magma(np.linspace(0, 1, len(data)))  # Generate colors based on number of lines
+
+    # Plot line plots for each dataset with custom colors
+    fig, ax = plt.subplots(figsize=(10, 8))  # Create figure and axis
+    for i, data_points in enumerate(data):
+        ax.plot(x_values, data_points, label=f'CSV {i+1}', color=colors[i])  # Plot with custom color
+
+    # Set background color to black
+    ax.set_facecolor('black')  # Set background color to black
+
+    # Add labels, title, legend, and grid
+    ax.set_title(f'Investigation Time of Mice in 1-Minute Bins ({paradigm})', color='white')  # Set title and text color
+    ax.set_xlabel('Minute', color='white')  # Set x-axis label and text color
+    ax.set_ylabel('Frames with Investigation', color='white')  # Set y-axis label and text color
+
+    # Customize legend position (move legend to upper right corner)
+    legend = ax.legend(loc='upper right', title='Legend', title_color='white', labelcolor='white')  # Create legend
+    legend.set_facecolor('black')  # Set legend background color to black
+    for text in legend.get_texts():
+        text.set_color('white')  # Set legend label colors
+
+    ax.grid(True, color='gray', linestyle='--', linewidth=0.5)  # Optional: add grid with custom style
+    sns.despine()
+
+    # Return the figure object
+    return fig

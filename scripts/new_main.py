@@ -14,7 +14,7 @@ from further_processing import percent_of_total_inv_time, disc_index, total_inv_
 from get_parameters import find_parameter_file
 from configurations import dlc_petridish_layout_fabi, dlc_petridish_layout_simon, dlc_mighty_snicket_layout_simon
 from split_exp_hab import split_csv, split_csv_chatgpt
-from figures import eventplot, pieplot, plot_cum_dist, plot_distance_val
+from figures import eventplot, pieplot, plot_cum_dist, plot_distance_val, prepare_data_line_plot, plot_multiple_line_plots, plot_multiple_line_plots_chatgpt
 
 #from move_file import move_file
 
@@ -22,8 +22,7 @@ from figures import eventplot, pieplot, plot_cum_dist, plot_distance_val
 # # # # Define your experiment here # # # #
 
 # define the project path - head directory of your specific dataset, that should be analyzed similarly
-project_path = "./datasets/FQ_petridishes_female_urine"
-# what objects were labelled?
+project_path = "./datasets/testing"
 left_obj = "leftpetridish"
 right_obj = "rightpetridish"
 
@@ -31,31 +30,33 @@ right_obj = "rightpetridish"
 dlc_analysis = False
 if dlc_analysis:
     # the dlc layout contains information about the column names of the bodyparts
-    dlc_layout = dlc_petridish_layout_fabi
+    dlc_layout = dlc_petridish_layout_simon
+    
 
     # define the bodyparts you want to extract out of the df for further calculations
-    used_bodyparts = ["snout", "leftpetridish", "rightpetridish", "centroid", "topleft", "topright"]
+    used_bodyparts = ["nose", "left_dish", "right_dish", "center", "topleft", "topright"]
 
 
     calc_distance_and_speed = True
     # what bodypart do you want to use for distance and speed calculation?
-    distance_bodypart = "centroid"
+    distance_bodypart = "center"
 
     calc_immobile_time = True
     # below what speed threshold [km/h] the animal is defined immobile?
-    immobile_threshold = 0.05
+    immobile_threshold = 0.1
 
     calc_dist_left_object = True
     calc_dist_right_object = True
-    # what bodypart is used for distance calculation?
-    obj_dist_bodypart = "snout"
-
+    # what bodypart and object are used for distance calculation?
+    obj_dist_bodypart = "nose"
+    left_obj = left_obj
+    right_obj = right_obj
     # do you want to calculate investigation behavior based on the distance?
     calc_inv_time = True
 
     calc_side_pref = True
     # give the bodypart that is checked for sidepref
-    side_pref_bodypart = "centroid"
+    side_pref_bodypart = "center"
     # give two coordinates that define the edges of the arena
     # will be used to 'draw' a center line 
     left_edge = "topleft"
@@ -71,15 +72,15 @@ if dlc_analysis:
     move_raw_csv = True
 
 # do you want to add deg data to existing parameter files?
-add_deg_data = True
+add_deg_data = False
 if add_deg_data:
     # how are deg behaviors labelled?
-    deg_behavior1 = '"SniffLeftDish'
-    deg_behavior2 = 'SniffRightDish"'
+    deg_behavior1 = "leftsniffing"
+    deg_behavior2 = "rightsniffing"
 
     # how should the column be indexed in the parameter files?
-    behavior1_index = "deg_is_investigating_left_dish"
-    behavior2_index = "deg_is_investigating_right_dish"
+    behavior1_index = "deg_is_investigating_left_snicket"
+    behavior2_index = "deg_is_investigating_right_snicket"
 
     # do you want to move the deg_csvs to the 'done' directory?
     move_deg_csv = True
@@ -90,7 +91,7 @@ if run_postprocessing:
     # should the parameter file be moved in the 'done' directory?
     move_para_file = True
 
-make_plots = False
+make_plots = True
 
 # for 20min videos: split csv files in habituation and experiment files...
 cut_dlc = False
@@ -131,6 +132,7 @@ if dlc_analysis:
 
 
 
+
     # calculate basic parametersfrom dlc data
     for file in tqdm(file_list):
         print(f"Working on file: {file}")
@@ -139,6 +141,7 @@ if dlc_analysis:
         df = rewrite_dataframe(csv_file_path=file, df_cols=dlc_layout) # rewrites the dataframe of dlc for easier readibility
         metadata = get_metadata(csv_file_path=file) # get metadata from the file name
         # new df only containing bodypart data used for calculations
+
         new_df = get_bodypart(df_all_bp=df,bodypart_list=used_bodyparts)  
 
 
@@ -241,14 +244,8 @@ if add_deg_data:
         parameter_df, parameter_df_path = find_parameter_file(deg_file=deg_file, metadata_dic=deg_metadata, parameter_paths=parameter_full_list)
 
         # append DeepEthogram data to the parameter_df
-        try:
-            parameter_df[behavior1_index] = np.array(deg_df[deg_behavior1])
-            parameter_df[behavior2_index] = np.array(deg_df[deg_behavior2])
-        except:
-            print("WARNING: DEG behavior lenght did not match the DLC data !!!!")
-            parameter_df = parameter_df.reindex(range(len(deg_df[deg_behavior2])))
-            parameter_df[behavior1_index] = np.array(deg_df[deg_behavior1])
-            parameter_df[behavior2_index] = np.array(deg_df[deg_behavior2])
+        parameter_df[behavior1_index] = np.array(deg_df[deg_behavior1])
+        parameter_df[behavior2_index] = np.array(deg_df[deg_behavior2])
 
         # save the new parameter_df to the same file
         parameter_df.to_csv(parameter_df_path)
@@ -315,10 +312,29 @@ if run_postprocessing:
 
 if make_plots:
 
-    path_parameters = f"{project_path}/processed/parameters/done/*.csv"
+    path_parameters = f"{project_path}/processed/parameters/new/*.csv"
     path_save_figs = f"{project_path}/figures/"
     file_list_parameters = glob.glob(path_parameters)
+    
+    test, mice, dates = prepare_data_line_plot(file_list=file_list_parameters, 
+                                  right_obj = right_obj, 
+                                  left_obj = left_obj, 
+                                  paradigm = "experiment",
+                                  sort_for_mouse= True,
+                                  mouse = "39806")
+    print(mice)
+    print(dates)
+    plot_multiple_line_plots(test, 
+                             mice=mice,
+                             dates=dates,
+                             paradigm = "experiment_petridish",
+                             save_path= path_save_figs,
+                             sort_for_mouse =True,
+                             mouse ="39806")
+    
 
+
+    """
     for file in tqdm(file_list_parameters):
         print(f"Working on file: {file}")
         time.sleep(0.2)
@@ -326,7 +342,7 @@ if make_plots:
         metadata = get_metadata(csv_file_path=file)
         parameters_df = pd.read_csv(file)
 
-
+        
         
         eventplot(metadata=metadata,
                 save_name=f"investigation_behavior_{factor}cm_radius", 
@@ -356,3 +372,5 @@ if make_plots:
                 lineoffsets=["deg sniff left dish", "def sniff right dish"],
                 colors=["m","y"],
                 skip_frame_stepsize=4)
+
+    """
