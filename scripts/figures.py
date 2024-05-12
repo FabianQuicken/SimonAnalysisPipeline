@@ -138,7 +138,7 @@ def plot_distance_val(metadata, data_list=list, save_name=str, colors=list , lab
     sns.despine()
     plt.savefig(f"./testing/{metadata['date']}_{metadata['mouse']}_{metadata['paradigm']}_{save_name}.svg", format='svg')
     
-def prepare_data_line_plot(file_list, right_obj, left_obj, sort_for_mouse = False, mouse= str, paradigm = str):
+def prepare_data_line_plot(file_list, right_obj, left_obj, sort_for_mouse = False, mouse= str, paradigm = str, dlc_or_deg = str):
 
     all_data_points = []
     mice = []
@@ -155,9 +155,9 @@ def prepare_data_line_plot(file_list, right_obj, left_obj, sort_for_mouse = Fals
                 data_points = []
 
                 if "right" in metadata["paradigm"]:
-                    urine_stim = df_copy[f"is_investigating_{right_obj}"]
+                    urine_stim = df_copy[f"{dlc_or_deg}is_investigating_{right_obj}"]
                 elif "left" in metadata["paradigm"]:
-                    urine_stim = df_copy[f"is_investigating_{left_obj}"]
+                    urine_stim = df_copy[f"{dlc_or_deg}is_investigating_{left_obj}"]
 
                 mice.append(metadata["mouse"])
                 dates.append(metadata["date"])
@@ -183,9 +183,9 @@ def prepare_data_line_plot(file_list, right_obj, left_obj, sort_for_mouse = Fals
                 data_points = []
 
                 if "right" in metadata["paradigm"]:
-                    urine_stim = df_copy[f"is_investigating_{right_obj}"]
+                    urine_stim = df_copy[f"{dlc_or_deg}is_investigating_{right_obj}"]
                 elif "left" in metadata["paradigm"]:
-                    urine_stim = df_copy[f"is_investigating_{left_obj}"]
+                    urine_stim = df_copy[f"{dlc_or_deg}is_investigating_{left_obj}"]
 
                 mice.append(metadata["mouse"])
                 dates.append(metadata["date"])
@@ -208,7 +208,7 @@ def prepare_data_line_plot(file_list, right_obj, left_obj, sort_for_mouse = Fals
 
 
 
-def plot_multiple_line_plots(data, mice, dates, paradigm, save_path, sort_for_mouse=False, mouse=str):
+def plot_multiple_line_plots(data, mice, dates, paradigm, save_path, sort_for_mouse=False, mouse=str, network=str):
     """
     Plot multiple line plots on the same diagram for given CSV files and column index.
 
@@ -226,7 +226,7 @@ def plot_multiple_line_plots(data, mice, dates, paradigm, save_path, sort_for_mo
     colors = plt.cm.viridis(np.linspace(0, 1, len(data)))
 
     # Plot line plots for each CSV file
-    plt.figure(figsize=(10, 8))  # Optional: set figure size
+    plt.figure(figsize=(10, 8), facecolor='black')  # Optional: set figure size
     for i, data_points in enumerate(data):
         plt.plot(x_values, data_points, label=f'mouse:{mice[i]}; date:{dates[i]}', color=colors[i])  # Plot each line plot with a label
 
@@ -235,8 +235,17 @@ def plot_multiple_line_plots(data, mice, dates, paradigm, save_path, sort_for_mo
 
     # Add labels, title, legend, and grid
     plt.title(f'Investigation time of mice in 1 min bins, paradigm: {paradigm}')
-    plt.xlabel('Minute')
-    plt.ylabel('Frames with investigation')
+    plt.xlabel('Minute', color='white')
+    plt.xticks(color='white')
+    plt.ylabel('Frames with investigation', color='white')
+    plt.yticks(color='white')
+
+     # Customize the axis spines (the lines around the plot area)
+    ax = plt.gca()
+    ax.spines['bottom'].set_color('white')  # Set color of the x-axis line to white
+    ax.spines['left'].set_color('white')    # Set color of the y-axis line to white
+
+
     #plt.legend()
     
     #plt.grid(True, color="gray")  # Optional: add grid
@@ -247,7 +256,7 @@ def plot_multiple_line_plots(data, mice, dates, paradigm, save_path, sort_for_mo
         plt.legend(loc='upper right', bbox_to_anchor=(1.0, 1.0), labelcolor='white', facecolor="black")
         # Adjust layout to ensure all plot elements are within the figure boundaries
         plt.tight_layout()
-        plt.savefig(f"{save_path}{paradigm}_mouse_{mouse}.svg", format='svg', facecolor="black")
+        plt.savefig(f"{save_path}{network}_{paradigm}_mouse_{mouse}.svg", format='svg', facecolor="black")
     else:
         # Customize legend position (move legend to the right)
         plt.legend(loc='center left', bbox_to_anchor=(1, 0.5), title='Legend', labelcolor='black')
@@ -274,20 +283,33 @@ def plot_multiple_line_plots_chatgpt(ax, data, paradigm, mouse=None):
     x_values = np.arange(1, 11)  # Generate x-values from 1 to 10
 
     # Define color map from yellow to purple
-    colors = plt.cm.magma(np.linspace(0, 1, len(data)))  # Generate colors based on number of lines
+    colors = plt.cm.viridis(np.linspace(0, 1, len(data)))  # Generate colors based on number of lines
 
     # Plot line plots for each dataset with custom colors
     for i, data_points in enumerate(data):
-        ax.plot(x_values, data_points, label=f'CSV {i+1}', color=colors[i])  # Plot with custom color
+        ax.plot(x_values, data_points, color=colors[i])  # Plot with custom color
 
     # Set background color to black
     ax.set_facecolor('black')  # Set background color to black
 
-    # Add labels, title, legend, and grid
+    # Set text and line colors to white
     ax.set_title(f'Investigation Time of Mice in 1-Minute Bins ({paradigm})', color='white')  # Set title and text color
     ax.set_xlabel('Minute', color='white')  # Set x-axis label and text color
     ax.set_ylabel('Frames with Investigation', color='white')  # Set y-axis label and text color
 
+    # Customize tick colors
+    ax.tick_params(axis='x', colors='white')  # Set x-axis tick color to white
+    ax.tick_params(axis='y', colors='white')  # Set y-axis tick color to white
+
+    # Customize axis spines (lines)
+    ax.spines['bottom'].set_color('white')  # Set color of the x-axis line to white
+    ax.spines['left'].set_color('white')    # Set color of the y-axis line to white
+
     # Customize legend position (move legend to upper right corner)
+    # ax.legend(loc='upper right', bbox_to_anchor=(1.0, 1.0), facecolor='black', edgecolor='white', labelcolor='white')
+
+    # Remove top and right spines
+    ax.spines['top'].set_visible(False)
+    ax.spines['right'].set_visible(False)
 
     sns.despine()

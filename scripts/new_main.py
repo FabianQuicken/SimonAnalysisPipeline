@@ -32,16 +32,16 @@ right_obj = "rightpetridish"
 dlc_analysis = False
 if dlc_analysis:
     # the dlc layout contains information about the column names of the bodyparts
-    dlc_layout = dlc_petridish_layout_simon
+    dlc_layout = dlc_petridish_layout_fabi
     
 
     # define the bodyparts you want to extract out of the df for further calculations
-    used_bodyparts = ["nose", "left_dish", "right_dish", "center", "topleft", "topright"]
+    used_bodyparts = ["snout", "leftpetridish", "rightpetridish", "centroid", "topleft", "topright"]
 
 
     calc_distance_and_speed = True
     # what bodypart do you want to use for distance and speed calculation?
-    distance_bodypart = "center"
+    distance_bodypart = "centroid"
 
     calc_immobile_time = True
     # below what speed threshold [km/h] the animal is defined immobile?
@@ -50,7 +50,7 @@ if dlc_analysis:
     calc_dist_left_object = True
     calc_dist_right_object = True
     # what bodypart and object are used for distance calculation?
-    obj_dist_bodypart = "nose"
+    obj_dist_bodypart = "snout"
     left_obj = left_obj
     right_obj = right_obj
     # do you want to calculate investigation behavior based on the distance?
@@ -58,7 +58,7 @@ if dlc_analysis:
 
     calc_side_pref = True
     # give the bodypart that is checked for sidepref
-    side_pref_bodypart = "center"
+    side_pref_bodypart = "centroid"
     # give two coordinates that define the edges of the arena
     # will be used to 'draw' a center line 
     left_edge = "topleft"
@@ -77,23 +77,26 @@ if dlc_analysis:
 add_deg_data = False
 if add_deg_data:
     # how are deg behaviors labelled?
-    deg_behavior1 = "leftsniffing"
-    deg_behavior2 = "rightsniffing"
+    deg_behavior1 = '"SniffLeftDish'
+    deg_behavior2 = 'SniffRightDish"'
 
     # how should the column be indexed in the parameter files?
-    behavior1_index = "deg_is_investigating_left_snicket"
-    behavior2_index = "deg_is_investigating_right_snicket"
+    behavior1_index = "deg_is_investigating_leftpetridish"
+    behavior2_index = "deg_is_investigating_rightpetridish"
 
     # do you want to move the deg_csvs to the 'done' directory?
     move_deg_csv = True
 
 # do you want to do postprocessing?
-run_postprocessing = False
+run_postprocessing = True
 if run_postprocessing:
     # should the parameter file be moved in the 'done' directory?
     move_para_file = True
 
-make_plots = True
+make_plots = False
+
+make_line_plots_one_mouse = True
+make_line_plots_all_mice = False
 
 # for 20min videos: split csv files in habituation and experiment files...
 cut_dlc = False
@@ -246,11 +249,21 @@ if add_deg_data:
         parameter_df, parameter_df_path = find_parameter_file(deg_file=deg_file, metadata_dic=deg_metadata, parameter_paths=parameter_full_list)
 
         # append DeepEthogram data to the parameter_df
-        parameter_df[behavior1_index] = np.array(deg_df[deg_behavior1])
-        parameter_df[behavior2_index] = np.array(deg_df[deg_behavior2])
+        try:
+            parameter_df[behavior1_index] = np.array(deg_df[deg_behavior1])
+            parameter_df[behavior2_index] = np.array(deg_df[deg_behavior2])
+            # save the new parameter_df to the same file
+            parameter_df.to_csv(parameter_df_path)
+        except:
+            print(f"Size of dataframe: {len(parameter_df)}. Size of DEG data: {len(deg_df)}.")
+            add_df = pd.DataFrame({
+                behavior1_index: np.array(deg_df[deg_behavior1]),
+                behavior2_index: np.array(deg_df[deg_behavior2])
+            })
+            concat_parameter_df = pd.concat([parameter_df, add_df], axis=1)
+            concat_parameter_df.to_csv(parameter_df_path)
 
-        # save the new parameter_df to the same file
-        parameter_df.to_csv(parameter_df_path)
+
 
         if move_deg_csv:
             # used deg file goes to the respective 'done' folder
@@ -313,27 +326,40 @@ if run_postprocessing:
 # # # # End: Take processed (parameter) data, calculate metrics, save metrics of similar paradigm recordings in one csv  # # # #
 
 if make_plots:
-
+    
     path_parameters = f"{project_path}/processed/parameters/new/*.csv"
     path_save_figs = f"{project_path}/figures/"
     file_list_parameters = glob.glob(path_parameters)
-    
-    test, mice, dates = prepare_data_line_plot(file_list=file_list_parameters, 
-                                  right_obj = right_obj, 
-                                  left_obj = left_obj, 
-                                  paradigm = "experiment",
-                                  sort_for_mouse= True,
-                                  mouse = "39806")
-    
 
-    
-    plot_multiple_line_plots(data=test,
-                             mice=mice,
-                             dates=dates,
-                             paradigm="experiment",
-                             save_path=path_save_figs, 
-                             sort_for_mouse=True,
-                             mouse="39806")
+    if make_line_plots_one_mouse:
+        mice = ["39623","39624","39625","39630","39631","39632", "39788", "39789", "39790", "39806"]
+        paradigm = "experiment"
+        # what network predictions to use for analysis? enter "deg" or "dlc"
+        network = "dlc"
+        if network == "deg":
+            dlc_or_deg = "deg_"
+        elif network == "dlc":
+            dlc_or_deg = ""
+
+        for mouse in mice:
+            test, mice, dates = prepare_data_line_plot(file_list=file_list_parameters, 
+                                        right_obj = right_obj, 
+                                        left_obj = left_obj, 
+                                        paradigm = paradigm,
+                                        sort_for_mouse= True,
+                                        mouse = mouse,
+                                        dlc_or_deg=dlc_or_deg)
+        
+
+        
+            plot_multiple_line_plots(data=test,
+                                    mice=mice,
+                                    dates=dates,
+                                    paradigm=paradigm,
+                                    save_path=path_save_figs, 
+                                    sort_for_mouse=True,
+                                    mouse=mouse,
+                                    network=network)
 
 
     """
@@ -376,18 +402,40 @@ if make_plots:
                 skip_frame_stepsize=4)
 
     """
-
-    """
-    # like this i could overlay multpile plots #
+    if make_line_plots_all_mice:
     
-    fig, ax = plt.subplots(figsize=(10, 8))
+        # like this i could overlay multpile plots #
+        mice = ["39623","39624","39625","39630","39631","39632", "39788", "39789", "39790", "39806"]
+        overlay_data = []
+        paradigm = "habituation"
+        # what network predictions to use for analysis? enter "deg" or "dlc"
+        network = "dlc"
+        if network == "deg":
+            dlc_or_deg = "deg_"
+        elif network == "dlc":
+            dlc_or_deg = ""
 
-    plot_multiple_line_plots_chatgpt(ax, test, paradigm="experiment", mouse="39806")
-    plot_multiple_line_plots_chatgpt(ax, test2, paradigm="experiment", mouse="39788")
 
-    # Save the overlaid figure
-    save_path = f"{project_path}/figures/combined_plots.svg"
-    fig.savefig(save_path, format='svg', facecolor='black')  # Save the figure with black background
+        for mouse in mice:
+            data, mice, dates = prepare_data_line_plot(file_list=file_list_parameters, 
+                                        right_obj = right_obj, 
+                                        left_obj = left_obj, 
+                                        paradigm = paradigm,
+                                        sort_for_mouse= True,
+                                        mouse = mouse,
+                                        dlc_or_deg=dlc_or_deg)
+            overlay_data.append(data)
+        
+        fig, ax = plt.subplots(figsize=(10, 8), facecolor='black')
+        for data in overlay_data:
 
-    plt.show()  # Show the overlaid figure
-    """
+            plot_multiple_line_plots_chatgpt(ax, data, paradigm=paradigm, mouse="n")
+        
+
+
+        # Save the overlaid figure
+        save_path = f"{project_path}/figures/{network}_combined_plots_dish_{paradigm}.svg"
+        fig.savefig(save_path, format='svg', facecolor='black')  # Save the figure with black background
+
+        plt.show()  # Show the overlaid figure
+    
