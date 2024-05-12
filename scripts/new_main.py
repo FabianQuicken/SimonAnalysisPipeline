@@ -24,9 +24,9 @@ from figures import eventplot, pieplot, plot_cum_dist, plot_distance_val, prepar
 # # # # Define your experiment here # # # #
 
 # define the project path - head directory of your specific dataset, that should be analyzed similarly
-project_path = "./datasets/testing"
-left_obj = "leftpetridish"
-right_obj = "rightpetridish"
+project_path = "./datasets/SH_mighty_snicket_female_urine"
+left_obj = "left_snicket"
+right_obj = "right_snicket"
 
 # do you want to process dlc csv files?
 dlc_analysis = False
@@ -93,10 +93,11 @@ if run_postprocessing:
     # should the parameter file be moved in the 'done' directory?
     move_para_file = True
 
-make_plots = False
+make_plots = True
 
-make_line_plots_one_mouse = True
+make_line_plots_one_mouse = False
 make_line_plots_all_mice = False
+make_event_plots = True
 
 # for 20min videos: split csv files in habituation and experiment files...
 cut_dlc = False
@@ -321,13 +322,13 @@ if run_postprocessing:
             shutil.move(file, path_parameters_done)
 
 
-    save_hab_exp(p_parameters_df, output_path=f"{project_path}/processed/processed_parameters/")
+    #save_hab_exp(p_parameters_df, output_path=f"{project_path}/processed/processed_parameters/")
 
 # # # # End: Take processed (parameter) data, calculate metrics, save metrics of similar paradigm recordings in one csv  # # # #
 
 if make_plots:
     
-    path_parameters = f"{project_path}/processed/parameters/new/*.csv"
+    path_parameters = f"{project_path}/processed/parameters/done/*.csv"
     path_save_figs = f"{project_path}/figures/"
     file_list_parameters = glob.glob(path_parameters)
 
@@ -393,15 +394,22 @@ if make_plots:
         plot_cum_dist(metadata=metadata,arr=distance, save_name="dist_travelled", color='m')
 
         plot_distance_val(metadata=metadata, data_list=[distance_to_leftdish, distance_to_rightdish], colors=['m', 'y'],save_name='dish_distances',labels=['leftdish', 'rightdish'])
+        """
+    if make_event_plots:
 
-        eventplot(metadata=deg_metadata,
-                save_name="investigation_behavior", 
-                data_list=[deg_df["leftsniffing"], deg_df["rightsniffing"]], 
-                lineoffsets=["deg sniff left dish", "def sniff right dish"],
-                colors=["m","y"],
-                skip_frame_stepsize=4)
+        for file in file_list_parameters:
+            metadata = get_metadata(csv_file_path=file)
+            parameters_df = pd.read_csv(file)
+            save_path = f"{project_path}/figures/"
+            eventplot(metadata=metadata,
+                    save_path=save_path,
+                    save_name=f"{metadata["date"]}_{metadata["mouse"]}_{metadata["paradigm"]}_investigation_behavior", 
+                    data_list=[parameters_df[f"deg_is_investigating_{left_obj}"], parameters_df[f"deg_is_investigating_{right_obj}"]], 
+                    lineoffsets=["deg sniff left dish", "def sniff right dish"],
+                    colors=["m","y"],
+                    skip_frame_stepsize=4)
 
-    """
+    
     if make_line_plots_all_mice:
     
         # like this i could overlay multpile plots #

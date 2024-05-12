@@ -22,7 +22,7 @@ def normalize(data_list, normalize_val, skip_frame_stepsize):
         data_list[i] = data_list[i] / (3600/skip_frame_stepsize) # division with stepsize, to calculate with respect to a downscaled array
     return data_list
   
-def eventplot(metadata, data_list, lineoffsets, save_name=str, colors = ["r", "b", "g", "v"], skip_frame_stepsize=1):
+def eventplot(metadata, data_list, lineoffsets, save_path, save_name=str, colors = ["r", "b", "g", "v"], skip_frame_stepsize=1):
     """
     This functions takes arrays filled with "1" or "0", and finds all indices with "1" which are declared as events.
     Beforehand, the data is downscaled via a stepsize to reduce the amount of bins presented in the eventplot, so the 
@@ -60,7 +60,7 @@ def eventplot(metadata, data_list, lineoffsets, save_name=str, colors = ["r", "b
     plt.title(f"Mouse: {metadata['mouse']}; Paradigm: {metadata['paradigm']}; Date: {metadata['date']}")
     sns.despine()
     plt.gca().set_facecolor('black')
-    plt.savefig(f"./testing/{metadata['date']}_{metadata['mouse']}_{metadata['paradigm']}_{save_name}.svg", format='svg')
+    plt.savefig(f"{save_path}{metadata['date']}_{metadata['mouse']}_{metadata['paradigm']}_{save_name}.svg", format='svg')
     
 
 
