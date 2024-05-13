@@ -24,9 +24,9 @@ from figures import eventplot, pieplot, plot_cum_dist, plot_distance_val, prepar
 # # # # Define your experiment here # # # #
 
 # define the project path - head directory of your specific dataset, that should be analyzed similarly
-project_path = "./datasets/SH_mighty_snicket_female_urine"
-left_obj = "left_snicket"
-right_obj = "right_snicket"
+project_path = "./datasets/SH_petridishes_female_urine"
+left_obj = "left_dish"
+right_obj = "right_dish"
 
 # do you want to process dlc csv files?
 dlc_analysis = False
@@ -403,9 +403,9 @@ if make_plots:
             save_path = f"{project_path}/figures/"
             eventplot(metadata=metadata,
                     save_path=save_path,
-                    save_name=f"{metadata["date"]}_{metadata["mouse"]}_{metadata["paradigm"]}_investigation_behavior", 
+                    save_name=f"{metadata['date']}_{metadata['mouse']}_{metadata['paradigm']}_investigation_behavior", 
                     data_list=[parameters_df[f"deg_is_investigating_{left_obj}"], parameters_df[f"deg_is_investigating_{right_obj}"]], 
-                    lineoffsets=["deg sniff left dish", "def sniff right dish"],
+                    lineoffsets=["deg sniff left dish", "deg sniff right dish"],
                     colors=["m","y"],
                     skip_frame_stepsize=4)
 
