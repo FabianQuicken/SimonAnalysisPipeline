@@ -97,7 +97,8 @@ make_plots = True
 
 make_line_plots_one_mouse = False
 make_line_plots_all_mice = False
-make_event_plots = True
+make_event_plots = False
+make_grouped_eventplots = True
 
 # for 20min videos: split csv files in habituation and experiment files...
 cut_dlc = False
@@ -446,4 +447,76 @@ if make_plots:
         fig.savefig(save_path, format='svg', facecolor='black')  # Save the figure with black background
 
         plt.show()  # Show the overlaid figure
-    
+
+
+    if make_grouped_eventplots:
+        # skip frames for less data
+        stepsize_skip = 50
+        start = 0
+        stop = 15000
+        # what columns?
+        ai = "dlc"
+
+
+        if ai == "deg":
+            line_color = "magenta"
+            left_col = "deg_is_investigating_left_dish"
+            right_col = "deg_is_investigating_right_dish"
+        else:
+            line_color = "yellow"
+            left_col = "is_investigating_left_dish"
+            right_col = "is_investigating_right_dish"
+        # here the data will be stored
+        data_stim = []
+        data_con = []
+        # how many frames should be used?
+        frame_max = 6000 # would be first third of my data
+        # generate empty figure
+        fig, ax = plt.subplots()
+        # get data first
+        for file in file_list_parameters:
+
+            metadata = get_metadata(csv_file_path=file)
+            parameters_df = pd.read_csv(file)
+
+
+            if "right" in metadata["paradigm"].lower() and "experiment" in metadata["paradigm"].lower():
+                stim_data = parameters_df[right_col][start:stop][::stepsize_skip]
+                con_data = parameters_df[left_col][start:stop][::stepsize_skip]
+                indices_stim = stim_data[stim_data == 1.0].index
+                indices_con = con_data[con_data == 1.0].index
+                data_stim.append(indices_stim)
+                data_con.append(indices_con)
+
+            elif "left" in metadata["paradigm"].lower() and "experiment" in metadata["paradigm"].lower():
+                stim_data = parameters_df[left_col][start:stop][::stepsize_skip]
+                con_data = parameters_df[right_col][start:stop][::stepsize_skip]
+                indices_stim = stim_data[stim_data == 1.0].index
+                indices_con = con_data[con_data == 1.0].index
+                data_stim.append(indices_stim)
+                data_con.append(indices_con)
+
+
+
+ 
+        for i, array in enumerate(data_stim):
+            ax.vlines(x=array, ymin=i, ymax=i+1, color=line_color, linestyle='-', alpha=0.7)
+        #for i, array in enumerate(data_con):
+        #    ax.vlines(x=array, ymin=i, ymax=i+1, color='yellow', linestyle='--', alpha=0.7)
+        # Set background color of the plot area
+        ax.set_facecolor('black')
+        
+        # Set color of axes and labels
+        ax.spines['bottom'].set_color('white')
+        ax.spines['left'].set_color('white')
+        ax.xaxis.label.set_color('white')
+        ax.yaxis.label.set_color('white')
+        ax.tick_params(axis='x', colors='white')
+        ax.tick_params(axis='y', colors='white')
+        #plt.show()
+        plt.savefig(f"{project_path}/figures/{ai}_ethograms_15000frames_skip{stepsize_skip}.svg", format='svg', facecolor="black")
+        
+
+            
+            
+      
