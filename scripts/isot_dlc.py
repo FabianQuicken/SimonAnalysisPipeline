@@ -34,7 +34,7 @@ for i in range(len(file_list_gt)):
     df_dlc = pd.read_csv(file_list_dlc[i])
 
     array_gt = df_gt["rightsniffing"].to_numpy()
-    array_dlc = df_dlc["is_investigating_right_dish"].to_numpy()
+    array_dlc = np.nan_to_num(df_dlc["is_investigating_right_dish"].to_numpy())
     
     sum_behavior += sum(array_gt)
     sum_frames += len(array_gt) 
@@ -86,12 +86,13 @@ gs = gridspec.GridSpec(1, 3, width_ratios=[3, 1, 1])  # Make event plot 3 times 
 
 # Plot the event plot
 ax0 = plt.subplot(gs[0])
-for i, array in enumerate(sum_overlay_gt_dlc):
-    ax0.vlines(x=array, ymin=i, ymax=i+1, color="magenta", linestyle='-', alpha=0.7, linewidth=line_width)
+
 for i, array in enumerate(sum_dlc_fn):
     ax0.vlines(x=array, ymin=i, ymax=i+1, color="yellow", linestyle='-', alpha=0.7, linewidth=line_width)
 for i, array in enumerate(sum_dlc_fp):
     ax0.vlines(x=array, ymin=i, ymax=i+1, color="cyan", linestyle='-', alpha=0.7, linewidth=line_width)
+for i, array in enumerate(sum_overlay_gt_dlc):
+    ax0.vlines(x=array, ymin=i, ymax=i+1, color="magenta", linestyle='-', alpha=0.7, linewidth=line_width)
 
 
 ax0.set_facecolor('black')
@@ -128,6 +129,7 @@ for i, values in enumerate(all_values):
 
 # Add labels, title, and format axes
 ax1.set_xticks(bar_positions)
+ax1.set_yticks([0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1])
 ax1.set_xticklabels(categories)
 ax1.set_xlabel("Metrics")
 ax1.set_ylabel("Scores")
