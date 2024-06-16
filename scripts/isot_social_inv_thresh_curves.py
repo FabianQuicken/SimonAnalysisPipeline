@@ -4,6 +4,7 @@ import glob
 import pandas as pd
 from matplotlib import gridspec
 import re
+import seaborn as sns
 
 
 #für face scheint 95 am besten 
@@ -20,7 +21,7 @@ def extract_suffix(file_path):
 # overlayed event plot
 project_path = "./isot/Social Investigation/Evaluation"
 
-path_dlc = f"{project_path}/dlc_raw/39804_39839_distance_threshs/*.csv"
+path_dlc = f"{project_path}/polynomal_interpolation/interpolated/39804_39839/*.csv"
 file_gt = f"{project_path}/gt/221205_topview_r39804_i39839_experiment_labels.csv"
 file_list_dlc = glob.glob(path_dlc)
 
@@ -33,13 +34,14 @@ for file in sorted_file_list:
     print(file)
 """
 
-behavior = "anogenital"
-behavior_net = "anogenital investigation"
+behavior = "nose"
+behavior_net = "face investigation"
 network = "DeepLabCut"
 
 precisions = []
 recalls = []
 f_scores = []
+nan_tp_count = []
 
 for i in range(len(sorted_file_list)):
     df_gt = pd.read_csv(file_gt)
@@ -51,6 +53,10 @@ for i in range(len(sorted_file_list)):
     array_dlc_tp = np.zeros(len(array_gt))
     array_dlc_fp = np.zeros(len(array_dlc))
     array_dlc_fn = np.zeros(len(array_dlc))
+
+    f_nose_nans = df_dlc["f_nose nan"]
+    m_nose_nans = df_dlc["m_nose nan"]
+    nan_tp = 0
 
     for j in range(len(array_gt)):
         # get dlc true positives (visualize overlay with ground truth)
@@ -67,26 +73,44 @@ for i in range(len(sorted_file_list)):
         if array_gt[j] == 1 and array_dlc[j] == 0:
             array_dlc_fn[j] = 1
 
+        # count NaN true positives in ground truth
+        if f_nose_nans[j] == 1 and array_gt[j] == 1 or m_nose_nans[j] == 1 and array_gt[j] == 1:
+            nan_tp += 1
 
+    
 
     precision = sum(array_dlc_tp) / (sum(array_dlc_tp) + sum(array_dlc_fp))
     recall = sum(array_dlc_tp) / (sum(array_dlc_tp) + sum(array_dlc_fn))
     f1_score = (2 * precision * recall) / (precision + recall)
+    nan_tp_rate = nan_tp / (sum(array_dlc_tp) + sum(array_dlc_fn))
 
     precisions.append(precision)
     recalls.append(recall)
     f_scores.append(f1_score)
+    nan_tp_count.append(nan_tp_rate)
 
 
-# Plotting the precision and recall as line graphs
-plt.figure(figsize=(10, 6))
-plt.plot(range(len(precisions)), precisions, label='Precision', marker='o')
-plt.plot(range(len(recalls)), recalls, label='Recall', marker='o')
-plt.plot(range(len(f_scores)), f_scores, label='F1_score', marker='o')
-plt.xlabel('File Index')
-plt.ylabel('Score')
-plt.title('Precision and Recall over Different Files')
+# Plotting the precision, recall, and F1 score as line graphs
+plt.figure(figsize=(5, 5), facecolor='black')
+plt.plot(range(len(precisions)), precisions, label='precision', color='cyan')
+plt.plot(range(len(recalls)), recalls, label='recall', color='yellow')
+plt.plot(range(len(f_scores)), f_scores, label='F1_score', color='magenta')
+plt.hlines(y=nan_tp_count[50], xmin=0, xmax=149, colors='grey', linestyles='--', label='fn due to missing prediction')
+#plt.plot(range(len(nan_tp_count)), nan_tp_count, label='NaN TP rate', color='grey')
+plt.xlabel('distance threshold [pixel]', color='white')
+plt.ylabel('score', color='white')
+plt.ylim(0, 1)
+plt.yticks(np.arange(0, 1.1, 0.2), color='white')
+plt.title(f'metrics for {behavior_net}', color='white')
 plt.legend()
-plt.grid(True)
-plt.savefig(f"{project_path}/{behavior}_39804_39839.svg", format='svg', facecolor="white")
+plt.legend(facecolor='black', edgecolor='white', labelcolor='white')
+#plt.grid(True)
+sns.despine()
+plt.gca().set_facecolor('black')
+plt.gca().tick_params(colors='white')
+plt.gca().spines['top'].set_color('white')
+plt.gca().spines['bottom'].set_color('white')
+plt.gca().spines['left'].set_color('white')
+plt.gca().spines['right'].set_color('white')
+plt.savefig(f"{project_path}/{behavior}_39804_39839_interpolated_polynomal.svg", format='svg', facecolor="black")
 plt.show()

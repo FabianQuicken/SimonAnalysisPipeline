@@ -7,7 +7,7 @@ from matplotlib import gridspec
 # overlayed event plot
 project_path = "./isot/Social Investigation/Evaluation"
 
-path_deg = f"{project_path}/dlc_raw/*.csv"
+path_deg = f"{project_path}/linear_interpolation/interpolated/behavior/*.csv"
 path_gt = f"{project_path}/gt/*.csv"
 file_list_deg = glob.glob(path_deg)
 file_list_gt = glob.glob(path_gt)
@@ -180,5 +180,5 @@ ax2.set_title("Proportion of Frames Containing Behavior", color='white')
 
 plt.tight_layout()
 #plt.show()
-plt.savefig(f"{project_path}/{network}_ethograms_{behavior}_investigation_skip_stepsizetp{step_size_tp}_stepsize{step_size}_frames{frames}.svg", format='svg', facecolor="black")
+plt.savefig(f"{project_path}/{network}_ethograms_{behavior}_investigation_skip_stepsizetp{step_size_tp}_stepsize{step_size}_frames{frames}_70_80_65_linear_interpolated.svg", format='svg', facecolor="black")
 

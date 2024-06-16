@@ -38,10 +38,12 @@ def distance_bodypart_bodypart(df, bodypart_1=str, bodypart_2=str):
     Note: Df gets likelihood filtered for points of interest first.
     """
     data = df.copy()
+    """
     data = likelihood_filtering_nans(df=data, 
                                 likelihood_row_name=bodypart_1+"_likelihood")
     data = likelihood_filtering_nans(df=data, 
                                 likelihood_row_name=bodypart_2+"_likelihood")
+    """
     bodypart_1_x = data[bodypart_1+"_x"]
     bodypart_1_y = data[bodypart_1+"_y"]
     bodypart_2_x = data[bodypart_2+"_x"]
@@ -102,6 +104,9 @@ for file in csv_files:
         df_bp[bodypart+"_likelihood"] = data[bodypart+"_likelihood"]
     df_bp.to_csv(file + "rewritten.csv")
 """
+
+
+"""
 distance_thresh = 0
 for i in range(150):
     
@@ -115,10 +120,14 @@ for i in range(150):
         dist_snout_m_lateral_r_f = distance_bodypart_bodypart(df = data, bodypart_1="m_snout", bodypart_2="f_lateralright")
         dist_snout_f_tailbase_m = distance_bodypart_bodypart(df = data, bodypart_1="f_snout", bodypart_2="m_tailbase")
         dist_snout_m_tailbase_f = distance_bodypart_bodypart(df = data, bodypart_1="m_snout", bodypart_2="f_tailbase")
+        snout_f = data["f_snout_x"]
+        snout_m =  data["m_snout_x"]
 
         face_invest = np.zeros(len(dist_snout_snout))
         body_invest = np.zeros(len(dist_snout_snout))
         ass_invest = np.zeros(len(dist_snout_snout))
+        nan_values_f = np.zeros(len(dist_snout_snout))
+        nan_values_m = np.zeros(len(dist_snout_snout))
 
         for i in range(len(dist_snout_snout)):
             if dist_snout_snout[i] <= distance_thresh:
@@ -130,9 +139,17 @@ for i in range(150):
             if dist_snout_f_tailbase_m[i] <=distance_thresh or dist_snout_m_tailbase_f[i] <=distance_thresh:
                 ass_invest[i] = 1
 
+            # count NaN true positives in ground truth
+            if np.isnan(snout_f[i]):
+                nan_values_f[i] = 1
+            if np.isnan(snout_m[i]):
+                nan_values_f[i] = 1
+
         social_behavior = {"face investigation": face_invest,
                         "body investigation": body_invest,
-                        "anogenital investigation": ass_invest}
+                        "anogenital investigation": ass_invest,
+                        "f_nose nan": nan_values_f,
+                        "m_nose nan": nan_values_m}
         
 
         output_df = pd.DataFrame(social_behavior)
@@ -140,3 +157,53 @@ for i in range(150):
         output_df.to_csv(file + f"social_behavior_{distance_thresh}.csv")
 
         distance_thresh +=1
+"""
+# optimale dist_threshs:
+# anogenital: 65 (interpolated), 70 (raw)
+# body: 80 (both)
+# face: 70 (interpolated), 75 (raw)
+
+dist_face = 75
+dist_body = 80
+dist_anogenital = 70
+
+for file in csv_files:
+    df = pd.read_csv(file)
+    data = df.copy()
+    dist_snout_snout = distance_bodypart_bodypart(df = data, bodypart_1="f_snout", bodypart_2="m_snout")
+    dist_snout_f_lateral_l_m = distance_bodypart_bodypart(df = data, bodypart_1="f_snout", bodypart_2="m_lateralleft")
+    dist_snout_f_lateral_r_m = distance_bodypart_bodypart(df = data, bodypart_1="f_snout", bodypart_2="m_lateralright")
+    dist_snout_m_lateral_l_f = distance_bodypart_bodypart(df = data, bodypart_1="m_snout", bodypart_2="f_lateralleft")
+    dist_snout_m_lateral_r_f = distance_bodypart_bodypart(df = data, bodypart_1="m_snout", bodypart_2="f_lateralright")
+    dist_snout_f_tailbase_m = distance_bodypart_bodypart(df = data, bodypart_1="f_snout", bodypart_2="m_tailbase")
+    dist_snout_m_tailbase_f = distance_bodypart_bodypart(df = data, bodypart_1="m_snout", bodypart_2="f_tailbase")
+    snout_f = data["f_snout_x"]
+    snout_m =  data["m_snout_x"]
+
+    face_invest = np.zeros(len(dist_snout_snout))
+    body_invest = np.zeros(len(dist_snout_snout))
+    ass_invest = np.zeros(len(dist_snout_snout))
+    nan_values_f = np.zeros(len(dist_snout_snout))
+    nan_values_m = np.zeros(len(dist_snout_snout))
+
+    for i in range(len(dist_snout_snout)):
+        if dist_snout_snout[i] <= dist_face:
+            face_invest[i] = 1
+            
+        if dist_snout_f_lateral_l_m[i] <=dist_body or dist_snout_f_lateral_r_m[i] <= dist_body or dist_snout_m_lateral_l_f[i] <= dist_body or dist_snout_m_lateral_r_f[i] <= dist_body:
+            body_invest[i] = 1
+            
+        if dist_snout_f_tailbase_m[i] <=dist_body or dist_snout_m_tailbase_f[i] <=dist_body:
+            ass_invest[i] = 1
+
+
+    social_behavior = {"face investigation": face_invest,
+                    "body investigation": body_invest,
+                    "anogenital investigation": ass_invest,
+                    }
+        
+
+    output_df = pd.DataFrame(social_behavior)
+
+    output_df.to_csv(file + f"social_behavior_{dist_face}_{dist_body}_{dist_anogenital}.csv")
+
