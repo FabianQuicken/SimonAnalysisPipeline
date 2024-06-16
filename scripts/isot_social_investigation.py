@@ -18,7 +18,7 @@ import numpy as np
 # gt_face_body = 4007, 4478, 9722
 # gt_face_ass = 2986, 8055, 5887
 
-def likelihood_filtering_nans(df, likelihood_row_name=str, filter_val=0.50):
+def likelihood_filtering_nans(df, likelihood_row_name=str, filter_val=0.20):
     """
     DeepLabCut provides a likelihood for the prediction of 
     each bodypart in each frame to be correct. Filtering predictions
@@ -102,36 +102,41 @@ for file in csv_files:
         df_bp[bodypart+"_likelihood"] = data[bodypart+"_likelihood"]
     df_bp.to_csv(file + "rewritten.csv")
 """
-for file in csv_files:
-    df = pd.read_csv(file)
-    data = df.copy()
-    dist_snout_snout = distance_bodypart_bodypart(df = data, bodypart_1="f_snout", bodypart_2="m_snout")
-    dist_snout_f_lateral_l_m = distance_bodypart_bodypart(df = data, bodypart_1="f_snout", bodypart_2="m_lateralleft")
-    dist_snout_f_lateral_r_m = distance_bodypart_bodypart(df = data, bodypart_1="f_snout", bodypart_2="m_lateralright")
-    dist_snout_m_lateral_l_f = distance_bodypart_bodypart(df = data, bodypart_1="m_snout", bodypart_2="f_lateralleft")
-    dist_snout_m_lateral_r_f = distance_bodypart_bodypart(df = data, bodypart_1="m_snout", bodypart_2="f_lateralright")
-    dist_snout_f_tailbase_m = distance_bodypart_bodypart(df = data, bodypart_1="f_snout", bodypart_2="m_tailbase")
-    dist_snout_m_tailbase_f = distance_bodypart_bodypart(df = data, bodypart_1="m_snout", bodypart_2="f_tailbase")
+distance_thresh = 0
+for i in range(150):
+    
+    for file in csv_files:
+        df = pd.read_csv(file)
+        data = df.copy()
+        dist_snout_snout = distance_bodypart_bodypart(df = data, bodypart_1="f_snout", bodypart_2="m_snout")
+        dist_snout_f_lateral_l_m = distance_bodypart_bodypart(df = data, bodypart_1="f_snout", bodypart_2="m_lateralleft")
+        dist_snout_f_lateral_r_m = distance_bodypart_bodypart(df = data, bodypart_1="f_snout", bodypart_2="m_lateralright")
+        dist_snout_m_lateral_l_f = distance_bodypart_bodypart(df = data, bodypart_1="m_snout", bodypart_2="f_lateralleft")
+        dist_snout_m_lateral_r_f = distance_bodypart_bodypart(df = data, bodypart_1="m_snout", bodypart_2="f_lateralright")
+        dist_snout_f_tailbase_m = distance_bodypart_bodypart(df = data, bodypart_1="f_snout", bodypart_2="m_tailbase")
+        dist_snout_m_tailbase_f = distance_bodypart_bodypart(df = data, bodypart_1="m_snout", bodypart_2="f_tailbase")
 
-    face_invest = np.zeros(len(dist_snout_snout))
-    body_invest = np.zeros(len(dist_snout_snout))
-    ass_invest = np.zeros(len(dist_snout_snout))
+        face_invest = np.zeros(len(dist_snout_snout))
+        body_invest = np.zeros(len(dist_snout_snout))
+        ass_invest = np.zeros(len(dist_snout_snout))
 
-    for i in range(len(dist_snout_snout)):
-        if dist_snout_snout[i] <= 70:
-            face_invest[i] = 1
+        for i in range(len(dist_snout_snout)):
+            if dist_snout_snout[i] <= distance_thresh:
+                face_invest[i] = 1
+            
+            if dist_snout_f_lateral_l_m[i] <=distance_thresh or dist_snout_f_lateral_r_m[i] <= distance_thresh or dist_snout_m_lateral_l_f[i] <= distance_thresh or dist_snout_m_lateral_r_f[i] <= distance_thresh:
+                body_invest[i] = 1
+            
+            if dist_snout_f_tailbase_m[i] <=distance_thresh or dist_snout_m_tailbase_f[i] <=distance_thresh:
+                ass_invest[i] = 1
+
+        social_behavior = {"face investigation": face_invest,
+                        "body investigation": body_invest,
+                        "anogenital investigation": ass_invest}
         
-        if dist_snout_f_lateral_l_m[i] <=70 or dist_snout_f_lateral_r_m[i] <= 70 or dist_snout_m_lateral_l_f[i] <= 70 or dist_snout_m_lateral_r_f[i] <= 70:
-            body_invest[i] = 1
-        
-        if dist_snout_f_tailbase_m[i] <=70 or dist_snout_m_tailbase_f[i] <=70:
-            ass_invest[i] = 1
 
+        output_df = pd.DataFrame(social_behavior)
 
-    print(file)
-    print("face:")
-    print(sum(face_invest))
-    print("body:")
-    print(sum(body_invest))
-    print("ass:")
-    print(sum(ass_invest))
+        output_df.to_csv(file + f"social_behavior_{distance_thresh}.csv")
+
+        distance_thresh +=1
