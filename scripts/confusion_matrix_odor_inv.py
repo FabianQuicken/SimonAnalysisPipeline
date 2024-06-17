@@ -7,9 +7,9 @@ import seaborn as sns
 from matplotlib.colors import LinearSegmentedColormap
 
 # Paths to the prediction and ground truth CSV files
-project_path = "./isot/Social Investigation/Evaluation"
-path_asoid = f"{project_path}/dlc_raw/thresh_75_80_70_optimal/*.csv"
-path_gt = f"{project_path}/gt/*.csv"
+project_path = "./isot/Odor Investigation/Evaluation"
+path_asoid = f"{project_path}/asoid_predictions/*.csv"
+path_gt = f"{project_path}/ground_truth/*.csv"
 
 # Collect file paths
 file_list_asoid = glob.glob(path_asoid)
@@ -28,9 +28,9 @@ for asoid_file, gt_file in zip(file_list_asoid, file_list_gt):
     df_gt = pd.read_csv(gt_file)
 
     # Extract the arrays
-    predictions_right = np.nan_to_num(df_asoid["is_investigating_right_dish"].to_numpy())
+    predictions_right = np.nan_to_num(df_asoid["rightsniffing"].to_numpy())
     ground_truth_right = df_gt["rightsniffing"].to_numpy()
-    predictions_left = np.nan_to_num(df_asoid["is_investigating_left_dish"].to_numpy())
+    predictions_left = np.nan_to_num(df_asoid["leftsniffing"].to_numpy())
     ground_truth_left = df_gt["leftsniffing"].to_numpy()
 
     # Append the data to the lists
@@ -58,7 +58,7 @@ conf_matrix_normalized = conf_matrix.astype('float') / conf_matrix.sum(axis=1)[:
 
 
 # Define labels for multi-class confusion matrix
-labels = ['background behavior', 'left dish investigation', 'right dish investigation']
+labels = ['background behavior', 'water investigation', 'odor investigation']
 
 # Create a custom colormap from black to yellow
 cmap = LinearSegmentedColormap.from_list('grey_to_yellow', ['black', 'gold'], N=256)
@@ -73,7 +73,7 @@ ax.set_facecolor('black')
 # Set label colors
 ax.set_xlabel('predicted', color='white')
 ax.set_ylabel('true', color='white')
-ax.set_title('DeepLabCut confusion matrix', color='white')
+ax.set_title('A-Soid confusion matrix', color='white')
 
 # Set tick colors
 ax.tick_params(axis='x', colors='white')
@@ -89,5 +89,5 @@ cbar.ax.yaxis.set_tick_params(color='white')
 plt.setp(cbar.ax.yaxis.get_majorticklabels(), color='white')
 cbar.set_label(label="", color='white')
 
-plt.savefig(f"{project_path}/dlc_confusionmatrix.svg", format='svg', facecolor="black")
+plt.savefig(f"{project_path}/asoid_confusionmatrix.svg", format='svg', facecolor="black")
 plt.show()
