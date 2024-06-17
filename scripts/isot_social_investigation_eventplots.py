@@ -7,14 +7,14 @@ from matplotlib import gridspec
 # overlayed event plot
 project_path = "./isot/Social Investigation/Evaluation"
 
-path_deg = f"{project_path}/linear_interpolation/interpolated/behavior/*.csv"
+path_deg = f"{project_path}/deg/*.csv"
 path_gt = f"{project_path}/gt/*.csv"
 file_list_deg = glob.glob(path_deg)
 file_list_gt = glob.glob(path_gt)
 
 behavior = "nose"
-behavior_net = "face investigation"
-network = "DeepLabCut"
+behavior_net = "nose-nose"
+network = "DeepEthogram"
 
 
 sum_overlay_gt_deg = []
@@ -31,7 +31,7 @@ f1_list = []
 # Define the step size
 step_size_tp = 2
 step_size = 1
-frames = 10000
+frames = 8000
 line_width = 0.2
 
 for i in range(len(file_list_gt)):
@@ -79,15 +79,12 @@ for i in range(len(file_list_gt)):
     sum_deg_fp.append(np.where(array_deg_fp == 1)[0][::step_size])
     sum_deg_fn.append(np.where(array_deg_fn == 1)[0][::step_size])
 
-print(precision_list)
-print(recall_list)
-print(f1_list)
 
 
-fig = plt.figure(figsize=(15, 5))  # Overall figure size
+fig = plt.figure(figsize=(12, 5), facecolor="black")  # Overall figure size
 
 # Create a gridspec with 2 columns of different widths
-gs = gridspec.GridSpec(1, 3, width_ratios=[3, 1, 1])  # Make event plot 3 times wider than bar plot
+gs = gridspec.GridSpec(1, 2, width_ratios=[4, 1])  # Make event plot 3 times wider than bar plot
 
 # Plot the event plot
 ax0 = plt.subplot(gs[0])
@@ -101,8 +98,8 @@ for i, array in enumerate(sum_overlay_gt_deg):
 
 
 ax0.set_facecolor('black')
-ax0.set_xlabel("Frames")
-ax0.set_ylabel("Sequences")
+ax0.set_xlabel("frames")
+ax0.set_ylabel("sequences")
 ax0.spines['bottom'].set_color('white')
 ax0.spines['left'].set_color('white')
 ax0.xaxis.label.set_color('white')
@@ -118,7 +115,7 @@ avg_f1 = np.mean(f1_list)
 
 # Plot bar plot with scatter overlay
 ax1 = plt.subplot(gs[1])
-categories = ['Precision', 'Recall', 'F1 Score']
+categories = ['precision', 'recall', 'F1 Score']
 averages = [avg_precision, avg_recall, avg_f1]
 all_values = [precision_list, recall_list, f1_list]
 
@@ -136,9 +133,9 @@ for i, values in enumerate(all_values):
 ax1.set_xticks(bar_positions)
 ax1.set_yticks([0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1])
 ax1.set_xticklabels(categories)
-ax1.set_xlabel("Metrics")
-ax1.set_ylabel("Scores")
-ax1.set_title("Precision, Recall, F1 Score with Scatter Overlay")
+ax1.set_xlabel("metrics")
+ax1.set_ylabel("scores")
+ax1.set_title("precision, recall, F1 Score with Scatter Overlay")
 
 # Change background and axis colors
 ax1.set_facecolor('black')
@@ -149,7 +146,7 @@ ax1.yaxis.label.set_color('white')
 ax1.tick_params(axis='x', colors='white')
 ax1.tick_params(axis='y', colors='white')
 ax1.set_title(f"{network} performance", color='white')
-
+"""
 ax2 = plt.subplot(gs[2])
 
 other = sum_frames - sum_behavior
@@ -177,7 +174,7 @@ for autotext in autotexts:
 
 # Add a title
 ax2.set_title("Proportion of Frames Containing Behavior", color='white')
-
+"""
 plt.tight_layout()
 #plt.show()
 plt.savefig(f"{project_path}/{network}_ethograms_{behavior}_investigation_skip_stepsizetp{step_size_tp}_stepsize{step_size}_frames{frames}_70_80_65_linear_interpolated.svg", format='svg', facecolor="black")
