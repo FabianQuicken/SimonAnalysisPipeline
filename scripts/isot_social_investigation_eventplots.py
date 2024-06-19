@@ -48,6 +48,7 @@ for i in range(len(file_list_gt)):
     array_deg_fp = np.zeros(len(array_deg))
     array_deg_fn = np.zeros(len(array_deg))
 
+
     for j in range(len(array_gt)):
         # get deg true positives (visualize overlay with ground truth)
         if array_gt[j] == 1 and array_deg[j] == 1:
@@ -84,7 +85,7 @@ for i in range(len(file_list_gt)):
 fig = plt.figure(figsize=(12, 5), facecolor="black")  # Overall figure size
 
 # Create a gridspec with 2 columns of different widths
-gs = gridspec.GridSpec(1, 2, width_ratios=[4, 1])  # Make event plot 3 times wider than bar plot
+gs = gridspec.GridSpec(1, 2, width_ratios=[4, 1])  # Make event plot 4 times wider than bar plot
 
 # Plot the event plot
 ax0 = plt.subplot(gs[0])
@@ -176,6 +177,6 @@ for autotext in autotexts:
 ax2.set_title("Proportion of Frames Containing Behavior", color='white')
 """
 plt.tight_layout()
-#plt.show()
-plt.savefig(f"{project_path}/{network}_ethograms_{behavior}_investigation_skip_stepsizetp{step_size_tp}_stepsize{step_size}_frames{frames}_70_80_65_linear_interpolated.svg", format='svg', facecolor="black")
+plt.show()
+#plt.savefig(f"{project_path}/{network}_ethograms_{behavior}_investigation_skip_stepsizetp{step_size_tp}_stepsize{step_size}_frames{frames}_70_80_65_linear_interpolated.svg", format='svg', facecolor="black")
 

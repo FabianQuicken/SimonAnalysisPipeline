@@ -2,8 +2,8 @@ import glob
 import pandas as pd
 
 # Define the project path and the pattern to match the CSV files
-project_path = "./isot/Social Investigation/Evaluation"
-dlc_raw_path = f"{project_path}/linear_interpolation/raw/*.csv"
+project_path = "./isot/Odor Investigation/Evaluation"
+dlc_raw_path = f"{project_path}/dist_thresh/*.csv"
 
 # Get a list of all CSV files matching the pattern
 csv_files = glob.glob(dlc_raw_path)

@@ -7,7 +7,7 @@ from matplotlib import gridspec
 
 
 
-gt_path = "./isot/Odor Investigation/Evaluation/ground_truth/*.csv"
+gt_path = "./isot/Odor Investigation/Evaluation/training_dataset/deg/*.csv"
 csv_files = glob.glob(gt_path)
 
 all_background = 0
@@ -43,10 +43,12 @@ def autopct_format(values):
 plt.figure(figsize=(5,5), facecolor='black')
 wedges, texts, autotexts = plt.pie([all_background, all_water, all_stim],
         explode=(0.01, 0.01, 0.01),
-        labels=["other","water","odor"],
+        labels=["other","left dish","right dish"],
         autopct=autopct_format([all_background, all_water, all_stim]),
         colors=["silver","lightskyblue","cornsilk"],
-        startangle=90)
+        startangle=90,
+        pctdistance=0.85,
+        labeldistance=1.05)
 #plt.gca().set_facecolor('black')
 
 # Set label colors
