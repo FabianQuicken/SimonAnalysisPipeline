@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 # Data for the plot
-values = [282360, 300]
+values = [360000, 385]
 colors = ['grey', 'white']
 
 # Create the plot
@@ -34,7 +34,7 @@ fig.patch.set_facecolor('black')
 ax.set_facecolor('black')
 
 # Save the plot as an SVG file
-plt.savefig('C:/ISOT 2024/Poster/bar_plot.svg', format='svg', facecolor=fig.get_facecolor())
+plt.savefig('C:/ISOT 2024/Poster/bar_plot_social.svg', format='svg', facecolor=fig.get_facecolor())
 
 # Display the plot (optional)
 plt.show()
