@@ -13,7 +13,7 @@ def check_string_in_string(full_string, part_string):
     else:
         return False
     
-def get_metadata(csv_file_path):
+def get_metadata(csv_file_path, paradigm = None):
     """
     Gets the metadata of the file name, based on the naming convention. The name is split with underscores: '_'.
     The file needs to be named: 'date_camera_mousenumber_paradigm_paradigm_paradigm_....'
@@ -22,28 +22,34 @@ def get_metadata(csv_file_path):
     file_name = os.path.splitext(os.path.basename(csv_file_path))[0]
     parts = file_name.split('_')
     
-    date = parts [0]
-    camera = parts [1]
-    mouse = parts [2]
-
-    if "DLC" in parts[5]:
-        parts[5] = parts[5][:-3]
-    #füge erkennung meines paradigms hinzu - wo kamera vorne steht
-    if camera == "topview" or camera == "sideview":
-        if "DLC" in parts[4]:
-            parts[4] = parts[4][:-3]
-        paradigm = parts[3] + "_" + parts[4]
-    else:
-        paradigm = parts[3]+"_"+parts[4]+"_"+parts[5]
-    #füge erkennung meines paradigms hinzu - wo datum vorne steht
-    if parts[0] == "topview" or parts[0] == "sideview":
-        date = parts[3]
-        camera = parts [0]
+    if paradigm is None:
+        # simons basic naming convention
+        date = parts [0]
+        camera = parts [1]
         mouse = parts [2]
-        if "DLC" in parts[4]:
-            paradigm = parts[1] + "_" + parts[4][:-3]
+
+        if "DLC" in parts[5]:
+            parts[5] = parts[5][:-3]
+        #füge erkennung meines paradigms hinzu - wo kamera vorne steht
+        if camera == "topview" or camera == "sideview":
+            if "DLC" in parts[4]:
+                parts[4] = parts[4][:-3]
+            paradigm = parts[3] + "_" + parts[4]
         else:
-            paradigm = parts[1] + "_" + parts[4]
+            paradigm = parts[3]+"_"+parts[4]+"_"+parts[5]
+        #füge erkennung meines paradigms hinzu - wo datum vorne steht
+        if parts[0] == "topview" or parts[0] == "sideview":
+            date = parts[3]
+            camera = parts [0]
+            mouse = parts [2]
+            if "DLC" in parts[4]:
+                paradigm = parts[1] + "_" + parts[4][:-3]
+            else:
+                paradigm = parts[1] + "_" + parts[4]
+    
+    if paradigm is not None:
+        pass
+
     return {"date": date,
             "camera": camera,
             "mouse": mouse,
