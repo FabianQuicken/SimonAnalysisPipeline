@@ -78,7 +78,7 @@ if dlc_analysis:
     move_raw_csv = True
 
 # do you want to add deg data to existing parameter files?
-add_deg_data = False
+add_deg_data = True
 if add_deg_data:
     # is there a parameter csv initialized (due to previous DLC analysis)?
     parameter_csv_present = False
