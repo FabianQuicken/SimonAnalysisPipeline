@@ -13,7 +13,7 @@ def check_string_in_string(full_string, part_string):
     else:
         return False
     
-def get_metadata(csv_file_path, paradigm = None):
+def get_metadata(csv_file_path, experiment = None):
     """
     Gets the metadata of the file name, based on the naming convention. The name is split with underscores: '_'.
     The file needs to be named: 'date_camera_mousenumber_paradigm_paradigm_paradigm_....'
@@ -21,12 +21,13 @@ def get_metadata(csv_file_path, paradigm = None):
     """
     file_name = os.path.splitext(os.path.basename(csv_file_path))[0]
     parts = file_name.split('_')
-    
-    if paradigm is None:
-        # simons basic naming convention
-        date = parts [0]
-        camera = parts [1]
-        mouse = parts [2]
+
+    # simons basic naming convention
+    date = parts [0]
+    camera = parts [1]
+    mouse = parts [2]
+
+    if experiment is None:
 
         if "DLC" in parts[5]:
             parts[5] = parts[5][:-3]
@@ -47,8 +48,12 @@ def get_metadata(csv_file_path, paradigm = None):
             else:
                 paradigm = parts[1] + "_" + parts[4]
     
-    if paradigm is not None:
-        pass
+    if experiment is "vol_vs_invol":
+
+        if "DLC" in parts[6]:
+            parts[6] = parts[6][:-3]
+        
+        paradigm = parts[3] + "_" + parts[4] + "_" + parts[5] + "_" + parts[6] 
 
     return {"date": date,
             "camera": camera,

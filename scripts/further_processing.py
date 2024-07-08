@@ -8,8 +8,11 @@ def get_paradigm(metadata, parameter_df, left_obj, right_obj):
         exp_or_hab = "experiment"
 
     if "right" in metadata["paradigm"]:
-        urine_stim = parameter_df[f"is_investigating_{right_obj}"]
-        control_stim = parameter_df[f"is_investigating_{left_obj}"]
+        try:
+            urine_stim = parameter_df[f"is_investigating_{right_obj}"]
+            control_stim = parameter_df[f"is_investigating_{left_obj}"]
+        except:
+            print("No dlc data available.")
         try:
             urine_stim_deg = parameter_df[f"deg_is_investigating_{right_obj}"]
             control_stim_deg = parameter_df[f"deg_is_investigating_{left_obj}"]
@@ -17,23 +20,29 @@ def get_paradigm(metadata, parameter_df, left_obj, right_obj):
             print("No deg data available.")
         
     elif "left" in metadata["paradigm"]:
-        urine_stim = parameter_df[f"is_investigating_{left_obj}"]
-        control_stim = parameter_df[f"is_investigating_{right_obj}"]
+        try:
+            urine_stim = parameter_df[f"is_investigating_{left_obj}"]
+            control_stim = parameter_df[f"is_investigating_{right_obj}"]
+        except:
+            print("No dlc data available.")
         try:
             urine_stim_deg = parameter_df[f"deg_is_investigating_{left_obj}"]
             control_stim_deg = parameter_df[f"deg_is_investigating_{right_obj}"]
         except:
             print("No deg data available.")
         
-
-    urine_stim = np.array(urine_stim)
-    control_stim = np.array(control_stim)
+    try:
+        urine_stim = np.array(urine_stim)
+        control_stim = np.array(control_stim)
+    except:
+        urine_stim = np.zeros(len(parameter_df))
+        control_stim = np.zeros(len(parameter_df))
     try:
         urine_stim_deg = np.array(urine_stim_deg)
         control_stim_deg = np.array(control_stim_deg)
     except:
-        urine_stim_deg = np.zeros(len(urine_stim))
-        control_stim_deg = np.zeros(len(control_stim))
+        urine_stim_deg = np.zeros(len(parameter_df))
+        control_stim_deg = np.zeros(len(parameter_df))
 
     return exp_or_hab, urine_stim, control_stim, urine_stim_deg, control_stim_deg
     

@@ -24,9 +24,13 @@ from figures import eventplot, pieplot, plot_cum_dist, plot_distance_val, prepar
 # # # # Define your experiment here # # # #
 
 # define the project path - head directory of your specific dataset, that should be analyzed similarly
-project_path = "./datasets/SH_petridishes_female_urine"
-left_obj = "left_dish"
-right_obj = "right_dish"
+project_path = "./datasets/SH_voluntary_vs_involuntary_urine"
+# if there is a specific naming convention, code needs to be passed to the get_metadata()
+# basic convention is: "date_camera_mouse_paradigm_paradigm_paradigm"
+# right now, "vol_vs_invol" is an extra option - use None for others!
+exp_meta_code = "vol_vs_invol"
+left_obj = "leftpetridish"
+right_obj = "rightpetridish"
 
 # do you want to process dlc csv files?
 dlc_analysis = False
@@ -76,29 +80,31 @@ if dlc_analysis:
 # do you want to add deg data to existing parameter files?
 add_deg_data = False
 if add_deg_data:
+    # is there a parameter csv initialized (due to previous DLC analysis)?
+    parameter_csv_present = False
     # how are deg behaviors labelled?
-    deg_behavior1 = '"SniffLeftDish'
-    deg_behavior2 = 'SniffRightDish"'
+    deg_behavior1 = 'leftsniffing'
+    deg_behavior2 = 'rightsniffing'
 
     # how should the column be indexed in the parameter files?
     behavior1_index = "deg_is_investigating_leftpetridish"
     behavior2_index = "deg_is_investigating_rightpetridish"
 
     # do you want to move the deg_csvs to the 'done' directory?
-    move_deg_csv = True
+    move_deg_csv = False
 
 # do you want to do postprocessing?
 run_postprocessing = True
 if run_postprocessing:
     # should the parameter file be moved in the 'done' directory?
-    move_para_file = True
+    move_para_file = False
 
-make_plots = True
+make_plots = False
 
 make_line_plots_one_mouse = False
 make_line_plots_all_mice = False
 make_event_plots = False
-make_grouped_eventplots = True
+make_grouped_eventplots = False
 
 # for 20min videos: split csv files in habituation and experiment files...
 cut_dlc = False
@@ -146,7 +152,7 @@ if dlc_analysis:
         time.sleep(0.2)
 
         df = rewrite_dataframe(csv_file_path=file, df_cols=dlc_layout) # rewrites the dataframe of dlc for easier readibility
-        metadata = get_metadata(csv_file_path=file) # get metadata from the file name
+        metadata = get_metadata(csv_file_path=file, experiment=exp_meta_code) # get metadata from the file name
         # new df only containing bodypart data used for calculations
 
         new_df = get_bodypart(df_all_bp=df,bodypart_list=used_bodyparts)  
@@ -232,38 +238,50 @@ if add_deg_data:
     deg_file_list = glob.glob(deg_path)
 
 
+    if parameter_csv_present:
+        # get all possible parameter paths
+        parameter_new_path = f"{project_path}/processed/parameters/new/*.csv"
+        parameter_new_list = glob.glob(parameter_new_path)
 
-    # get all possible parameter paths
-    parameter_new_path = f"{project_path}/processed/parameters/new/*.csv"
-    parameter_new_list = glob.glob(parameter_new_path)
-
-    parameter_done_path = f"{project_path}/processed/parameters/done/*.csv"
-    parameter_done_list = glob.glob(parameter_done_path)
-    parameter_full_list = parameter_new_list + parameter_done_list
+        parameter_done_path = f"{project_path}/processed/parameters/done/*.csv"
+        parameter_done_list = glob.glob(parameter_done_path)
+        parameter_full_list = parameter_new_list + parameter_done_list
 
     for deg_file in tqdm(deg_file_list):
         time.sleep(0.2)
 
         # get the DeepEthogram dataframe and the matching parameter_df
-        deg_metadata = get_metadata(deg_file)
+        deg_metadata = get_metadata(deg_file, experiment=exp_meta_code)
         deg_df = pd.read_csv(deg_file)
 
-        parameter_df, parameter_df_path = find_parameter_file(deg_file=deg_file, metadata_dic=deg_metadata, parameter_paths=parameter_full_list)
+        if parameter_csv_present:
 
-        # append DeepEthogram data to the parameter_df
-        try:
-            parameter_df[behavior1_index] = np.array(deg_df[deg_behavior1])
-            parameter_df[behavior2_index] = np.array(deg_df[deg_behavior2])
-            # save the new parameter_df to the same file
-            parameter_df.to_csv(parameter_df_path)
-        except:
-            print(f"Size of dataframe: {len(parameter_df)}. Size of DEG data: {len(deg_df)}.")
-            add_df = pd.DataFrame({
-                behavior1_index: np.array(deg_df[deg_behavior1]),
-                behavior2_index: np.array(deg_df[deg_behavior2])
-            })
-            concat_parameter_df = pd.concat([parameter_df, add_df], axis=1)
-            concat_parameter_df.to_csv(parameter_df_path)
+            parameter_df, parameter_df_path = find_parameter_file(deg_file=deg_file, metadata_dic=deg_metadata, parameter_paths=parameter_full_list)
+
+            # append DeepEthogram data to the parameter_df
+            try:
+                parameter_df[behavior1_index] = np.array(deg_df[deg_behavior1])
+                parameter_df[behavior2_index] = np.array(deg_df[deg_behavior2])
+                # save the new parameter_df to the same file
+                parameter_df.to_csv(parameter_df_path)
+            except:
+                print(f"Size of dataframe: {len(parameter_df)}. Size of DEG data: {len(deg_df)}.")
+                add_df = pd.DataFrame({
+                    behavior1_index: np.array(deg_df[deg_behavior1]),
+                    behavior2_index: np.array(deg_df[deg_behavior2])
+                })
+                concat_parameter_df = pd.concat([parameter_df, add_df], axis=1)
+                concat_parameter_df.to_csv(parameter_df_path)
+        
+        if not parameter_csv_present:
+            
+            print(deg_metadata)
+
+            parameters = {}
+            parameters[behavior1_index] = np.array(deg_df[deg_behavior1])
+            parameters[behavior2_index] = np.array(deg_df[deg_behavior2])
+
+            parameters_to_csv(metadata_dic=deg_metadata,parameters=parameters,path=f"{project_path}/processed/parameters/new/")
 
 
 
@@ -289,33 +307,45 @@ if run_postprocessing:
         print(f"Working on file: {file}")
         time.sleep(0.2)
 
-        metadata = get_metadata(csv_file_path=file)
+        metadata = get_metadata(csv_file_path=file,experiment=exp_meta_code)
         parameters_df = pd.read_csv(file)
 
-        perc_total_inv_dlc, perc_total_inv_deg, exp_or_hab = percent_of_total_inv_time(metadata,parameters_df, left_obj=left_obj, right_obj=right_obj)
-        total_inv_dlc, total_inv_deg = total_inv_time(metadata, parameters_df, left_obj=left_obj, right_obj=right_obj)
-        disc_ind_dlc, disc_ind_deg = disc_index(metadata, parameters_df, left_obj=left_obj, right_obj=right_obj)
-        median_speed_val = median_speed(parameters_df)
-        distance_per_min = full_distance(parameters_df)
-        immobile_percentage = full_immobile_time(parameters_df)
+        perc_total_inv_dlc, perc_total_inv_deg, exp_or_hab = percent_of_total_inv_time(metadata,parameters_df, left_obj=left_obj, right_obj=right_obj, dlc=False)
+        total_inv_dlc, total_inv_deg = total_inv_time(metadata, parameters_df, left_obj=left_obj, right_obj=right_obj, dlc=False)
+        disc_ind_dlc, disc_ind_deg = disc_index(metadata, parameters_df, left_obj=left_obj, right_obj=right_obj, dlc=False)
+        #median_speed_val = median_speed(parameters_df)
+        #distance_per_min = full_distance(parameters_df)
+        #immobile_percentage = full_immobile_time(parameters_df)
 
-        metadata = get_metadata(file)
+        #metadata = get_metadata(file)
 
         if not p_parameters_df_initialized:
-            p_parameters = {"Stimulus to total investigation DLC [%]": perc_total_inv_dlc,
-                            "Total investigation time DLC [%]": total_inv_dlc,
-                            "Discrimination Index DLC": disc_ind_dlc,
+            p_parameters = {
+                            #"Stimulus to total investigation DLC [%]": perc_total_inv_dlc,
+                            #"Total investigation time DLC [%]": total_inv_dlc,
+                            #"Discrimination Index DLC": disc_ind_dlc,
                             "Stimulus to total investigation DEG [%]": perc_total_inv_deg,
                             "Total investigation time DEG [%]": total_inv_deg,
                             "Discrimination Index DEG": disc_ind_deg,
-                            "Median speed [km/h]": median_speed_val,
-                            "Distance per minute [m]": distance_per_min,
-                            "Immobile time [%]": immobile_percentage}
+                            #"Median speed [km/h]": median_speed_val,
+                            #"Distance per minute [m]": distance_per_min,
+                            #"Immobile time [%]": immobile_percentage
+                            }
             p_parameters_df = ini_processed_parameters_df(processed_parameters=p_parameters, metadata_dic=metadata)
             p_parameters_df_initialized = True
 
         elif p_parameters_df_initialized:
-            p_parameters = [perc_total_inv_dlc, total_inv_dlc, disc_ind_dlc, perc_total_inv_deg, total_inv_deg, disc_ind_deg, median_speed_val, distance_per_min, immobile_percentage]
+            p_parameters = [
+                            #perc_total_inv_dlc, 
+                            #total_inv_dlc,
+                            #disc_ind_dlc,
+                            perc_total_inv_deg,
+                            total_inv_deg,
+                            disc_ind_deg,
+                            #median_speed_val,
+                            #distance_per_min,
+                            #immobile_percentage
+                            ]
             p_parameters_df = append_processed_parameters_df(processed_parameters_df=p_parameters_df,processed_parameters=p_parameters,metadata_dic=metadata)
 
         # parameter file goes to the respective 'done' folder
@@ -323,7 +353,7 @@ if run_postprocessing:
             shutil.move(file, path_parameters_done)
 
 
-    #save_hab_exp(p_parameters_df, output_path=f"{project_path}/processed/processed_parameters/")
+    save_hab_exp(p_parameters_df, output_path=f"{project_path}/processed/processed_parameters/")
 
 # # # # End: Take processed (parameter) data, calculate metrics, save metrics of similar paradigm recordings in one csv  # # # #
 
@@ -399,7 +429,7 @@ if make_plots:
     if make_event_plots:
 
         for file in file_list_parameters:
-            metadata = get_metadata(csv_file_path=file)
+            metadata = get_metadata(csv_file_path=file, experiment=exp_meta_code)
             parameters_df = pd.read_csv(file)
             save_path = f"{project_path}/figures/"
             eventplot(metadata=metadata,
@@ -476,7 +506,7 @@ if make_plots:
         # get data first
         for file in file_list_parameters:
 
-            metadata = get_metadata(csv_file_path=file)
+            metadata = get_metadata(csv_file_path=file, experiment=exp_meta_code)
             parameters_df = pd.read_csv(file)
 
 
