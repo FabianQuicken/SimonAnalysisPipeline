@@ -266,6 +266,8 @@ def calc_interior_zone_polygon(df, bodypart=str):
         new_y = centroid_y + (y - centroid_y) * 0.8
         new_coords.append((new_x, new_y))
 
+    pass
+
 
 
 
