@@ -85,15 +85,22 @@ def pieplot(metadata, data_list, save_name=str, colors=["m","y"], labels=[]):
     
 
 def plot_cum_dist(metadata, arr, save_name=str, color=str):
+    """
+    This function can be used to create a lineplot to visualize the cumulative distance.
+    It takes an array containing distance values in meters.
+    """
     print(np.nansum(arr))
     plt.figure(figsize=(6,6))
+    # removes NaN values and computes the cumulative sum.
     arr = arr[~np.isnan(arr)]
     cum_dist = np.cumsum(arr)
+    # creates an array of timepoints and normalized the time points to be between 0 and 10 minutes.
     time_points = np.arange(len(arr))
     time_points = time_points/len(time_points)*10
     print(len(time_points))
 
     plt.plot(time_points, cum_dist, color=color)
+    # fills area under curve with semi-transparent color
     plt.fill_between(time_points, 0, cum_dist, alpha=0.3, color=color)
     plt.ylim(0,(1.5*cum_dist[-1]))
     plt.xlim(0,time_points[-1])
@@ -102,7 +109,7 @@ def plot_cum_dist(metadata, arr, save_name=str, color=str):
     plt.ylabel('distance[m]')
     sns.despine()
     plt.title(f"Mouse: {metadata['mouse']}; Paradigm: {metadata['paradigm']}; Date: {metadata['date']}") 
-    plt.savefig(f"./testing/{metadata['date']}_{metadata['mouse']}_{metadata['paradigm']}_{save_name}.svg", format='svg')
+    plt.savefig(f"./figures/{metadata['date']}_{metadata['mouse']}_{metadata['paradigm']}_{save_name}.svg", format='svg')
     
 
 
@@ -136,7 +143,7 @@ def plot_distance_val(metadata, data_list=list, save_name=str, colors=list , lab
     plt.xlabel('Experiment length [min]')
     plt.title(f"Mouse: {metadata['mouse']}; Paradigm: {metadata['paradigm']}; Date: {metadata['date']}")
     sns.despine()
-    plt.savefig(f"./testing/{metadata['date']}_{metadata['mouse']}_{metadata['paradigm']}_{save_name}.svg", format='svg')
+    plt.savefig(f"./figures/{metadata['date']}_{metadata['mouse']}_{metadata['paradigm']}_{save_name}.svg", format='svg')
     
 def prepare_data_line_plot(file_list, right_obj, left_obj, sort_for_mouse = False, mouse= str, paradigm = str, dlc_or_deg = str):
 

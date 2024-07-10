@@ -208,6 +208,66 @@ def immobile_time(speed_values, immobile_threshold = 0.1):
             is_immobile[i] = np.nan
     return is_immobile
 
+def calc_interior_zone_polygon(df, bodypart=str):
+    "Normally, the nose should be used because it indicates the orientation of the mouse best."
+    data = df.copy()
+    print(f"\nGet time spent of {bodypart} at cage edges...")
+    print(f"Filtering {bodypart} for position calculation...")
+    data = likelihood_filtering_nans(df=data, 
+                                likelihood_row_name=bodypart+"_likelihood")
+    bodypart_x = data[bodypart+"_x"]
+    bodypart_y = data[bodypart+"_y"]
+
+    print("Filtering for good corner prediction...")
+    corners = ["topleft", "topright", "bottomleft", "bottomright"]
+    for corner in corners:
+        data = likelihood_filtering(df=data, 
+                                    likelihood_row_name=f"{corner}_likelihood",
+                                    filter_val=0.95)
+    topleft_x = data["topleft_x"]
+    topleft_y = data["topleft_y"]
+    topright_x = data["topright_x"]
+    topright_y = data["topright_y"]
+    bottomleft_x = data["bottomleft_x"]
+    bottomleft_y = data["bottomleft_y"]
+    bottomright_x = data["bottomright_x"]
+    bottomright_y = data["bottomright_y"]
+
+    bodypart_x = np.array(bodypart_x)
+    bodypart_y = np.array(bodypart_y)
+    topleft_x = np.array(topleft_x)
+    topleft_y = np.array(topleft_y)
+    topright_x = np.array(topright_x)
+    topright_y = np.array(topright_y)
+    bottomleft_x = np.array(bottomleft_x)
+    bottomleft_y = np.array(bottomleft_y)
+    bottomright_x = np.array(bottomright_x)
+    bottomright_y = np.array(bottomright_y)
+
+    topleft_x = topleft_x[0]
+    topleft_y = topleft_y[0]
+    topright_x = topright_x[0]
+    topright_y = topright_y[0]
+    bottomleft_x = bottomleft_x[0]
+    bottomleft_y = bottomleft_y[0]
+    bottomright_x = bottomright_x[0]
+    bottomright_y = bottomright_y[0]
+
+    old_coords = [(topleft_x, topleft_y), (topright_x, topright_y), (bottomleft_x,bottomleft_y), (bottomright_x, bottomright_y)]
+
+    # Calculate the centroid of the polygon
+    centroid_x = sum([x for x, y in old_coords]) / len(old_coords)
+    centroid_y = sum([y for x, y in old_coords]) / len(old_coords)
+
+    # Scale each point towards the centroid
+    new_coords = []
+    for x, y in old_coords:
+        new_x = centroid_x + (x - centroid_x) * 0.8
+        new_y = centroid_y + (y - centroid_y) * 0.8
+        new_coords.append((new_x, new_y))
+
+
+
 
 
 

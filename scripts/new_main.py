@@ -12,7 +12,7 @@ from get_metadata import get_metadata
 from get_bodyparts_from_DLC import rewrite_dataframe, get_bodypart
 from save_to_csv import metadata_bodyparts_to_csv, parameters_to_csv, ini_processed_parameters_df, append_processed_parameters_df, save_hab_exp
 from calculate_parameters import distance_travelled, calculate_speed, distance_bodypart_object,time_spent_sides,investigation_time,immobile_time
-from further_processing import percent_of_total_inv_time, disc_index, total_inv_time, median_speed, full_distance, full_immobile_time
+from further_processing import percent_of_total_inv_time, disc_index, total_inv_time, median_speed, full_distance, full_immobile_time, analyze_ethogram, get_behavior_sum
 from get_parameters import find_parameter_file
 from configurations import dlc_petridish_layout_fabi, dlc_petridish_layout_simon, dlc_mighty_snicket_layout_simon
 from split_exp_hab import split_csv, split_csv_chatgpt
@@ -24,28 +24,28 @@ from figures import eventplot, pieplot, plot_cum_dist, plot_distance_val, prepar
 # # # # Define your experiment here # # # #
 
 # define the project path - head directory of your specific dataset, that should be analyzed similarly
-project_path = "./datasets/SH_voluntary_vs_involuntary_urine"
+project_path = "./datasets/testing"
 # if there is a specific naming convention, code needs to be passed to the get_metadata()
 # basic convention is: "date_camera_mouse_paradigm_paradigm_paradigm"
 # right now, "vol_vs_invol" is an extra option - use None for others!
 exp_meta_code = "vol_vs_invol"
-left_obj = "leftpetridish"
-right_obj = "rightpetridish"
+left_obj = "left_dish"
+right_obj = "right_dish"
 
 # do you want to process dlc csv files?
-dlc_analysis = False
+dlc_analysis = True
 if dlc_analysis:
     # the dlc layout contains information about the column names of the bodyparts
-    dlc_layout = dlc_petridish_layout_fabi
+    dlc_layout = dlc_petridish_layout_simon
     
 
     # define the bodyparts you want to extract out of the df for further calculations
-    used_bodyparts = ["snout", "leftpetridish", "rightpetridish", "centroid", "topleft", "topright"]
+    used_bodyparts = ["nose", "left_dish", "right_dish", "center", "topleft", "topright", "bottomleft", "bottomright"]
 
 
     calc_distance_and_speed = True
     # what bodypart do you want to use for distance and speed calculation?
-    distance_bodypart = "centroid"
+    distance_bodypart = "center"
 
     calc_immobile_time = True
     # below what speed threshold [km/h] the animal is defined immobile?
@@ -54,7 +54,7 @@ if dlc_analysis:
     calc_dist_left_object = True
     calc_dist_right_object = True
     # what bodypart and object are used for distance calculation?
-    obj_dist_bodypart = "snout"
+    obj_dist_bodypart = "nose"
     left_obj = left_obj
     right_obj = right_obj
     # do you want to calculate investigation behavior based on the distance?
@@ -62,7 +62,7 @@ if dlc_analysis:
 
     calc_side_pref = True
     # give the bodypart that is checked for sidepref
-    side_pref_bodypart = "centroid"
+    side_pref_bodypart = "center"
     # give two coordinates that define the edges of the arena
     # will be used to 'draw' a center line 
     left_edge = "topleft"
@@ -72,30 +72,51 @@ if dlc_analysis:
     save_bodyparts = True
 
     # do you want to save the calculated parameters to a csv?
-    save_parameters = True
+    save_parameters = False
 
     # do you want to move the raw dlc csv's from 'new' to 'done' folder?
     move_raw_csv = True
 
 # do you want to add deg data to existing parameter files?
-add_deg_data = True
+add_deg_data = False
 if add_deg_data:
     # is there a parameter csv initialized (due to previous DLC analysis)?
-    parameter_csv_present = False
+    parameter_csv_present = True
     # how are deg behaviors labelled?
     deg_behavior1 = 'leftsniffing'
     deg_behavior2 = 'rightsniffing'
 
     # how should the column be indexed in the parameter files?
-    behavior1_index = "deg_is_investigating_leftpetridish"
-    behavior2_index = "deg_is_investigating_rightpetridish"
+    behavior1_index = f"deg_is_investigating_{left_obj}"
+    behavior2_index = f"deg_is_investigating_{right_obj}"
 
     # do you want to move the deg_csvs to the 'done' directory?
-    move_deg_csv = False
+    move_deg_csv = True
 
 # do you want to do postprocessing?
-run_postprocessing = True
+run_postprocessing = False
 if run_postprocessing:
+    # do you want to calculate the total time in % of each behavior?
+    analyze_sum_behavior = True
+    # do you want to calculate the amount of stimulus investigation to total investigation (stim + water)?
+    analyze_stim_inv_to_total = True
+    # do you want to calculate the total investigation time (both dishes together)
+    analyze_total_inv = True
+    # do you wnt to calculate the discrimination index towards the stimulus side?
+    analyze_discrimination = True
+    # do you want to analyze behavior predictions for bout count and bout length?
+    analyze_bouts = True
+    if analyze_bouts:
+        # for deg?
+        analyze_deg_stim_bouts = True
+        # for deg control investigation? (default is stimulus investigation)
+        analyze_deg_con_bouts = True
+        # for dlc?
+        analyze_dlc_stim_bouts = True
+        # for dlc control investigation?
+        analyze_dlc_con_bouts = True
+    # do you want to analyze movement behavior? (median speed, distance travelled and immobile time)
+    analyze_movement = True
     # should the parameter file be moved in the 'done' directory?
     move_para_file = False
 
@@ -104,7 +125,7 @@ make_plots = False
 make_line_plots_one_mouse = False
 make_line_plots_all_mice = False
 make_event_plots = False
-make_grouped_eventplots = False
+make_grouped_eventplots = True
 
 # for 20min videos: split csv files in habituation and experiment files...
 cut_dlc = False
@@ -256,7 +277,10 @@ if add_deg_data:
 
         if parameter_csv_present:
 
-            parameter_df, parameter_df_path = find_parameter_file(deg_file=deg_file, metadata_dic=deg_metadata, parameter_paths=parameter_full_list)
+            parameter_df, parameter_df_path = find_parameter_file(deg_file=deg_file,
+                                                                  metadata_dic=deg_metadata,
+                                                                  parameter_paths=parameter_full_list,
+                                                                  experiment=exp_meta_code)
 
             # append DeepEthogram data to the parameter_df
             try:
@@ -302,52 +326,189 @@ if run_postprocessing:
     # therefore, we first need to initialize the df, then append to it
     # this variable checks, if a df was initialized and is first set to False
     p_parameters_df_initialized = False
+    #p_parameters_df = pd.DataFrame()
+    p_parameters = {}
 
     for file in tqdm(file_list_parameters):
         print(f"Working on file: {file}")
         time.sleep(0.2)
 
+        if p_parameters_df_initialized:
+            p_parameters = []
+
         metadata = get_metadata(csv_file_path=file,experiment=exp_meta_code)
         parameters_df = pd.read_csv(file)
+        
+        if analyze_sum_behavior:
+            dlc_calc_stim, dlc_calc_con, deg_calc_stim, deg_calc_con, exp_or_hab = get_behavior_sum(metadata,
+                                                                                                    parameters_df,
+                                                                                                    left_obj=left_obj,
+                                                                                                    right_obj=right_obj)
+            if not p_parameters_df_initialized:
+                p_parameters["Stimulus investigation DLC [%]"] = dlc_calc_stim
+                p_parameters["Stimulus investigation DEG [%]"] = deg_calc_stim
+                p_parameters["Control investigation DLC [%]"] = dlc_calc_con
+                p_parameters["Control investigation DEG [%]"] = deg_calc_con
+            elif p_parameters_df_initialized:
+                p_parameters.append(dlc_calc_stim)
+                p_parameters.append(deg_calc_stim)
+                p_parameters.append(dlc_calc_con)
+                p_parameters.append(deg_calc_con)
 
-        perc_total_inv_dlc, perc_total_inv_deg, exp_or_hab = percent_of_total_inv_time(metadata,parameters_df, left_obj=left_obj, right_obj=right_obj, dlc=False)
-        total_inv_dlc, total_inv_deg = total_inv_time(metadata, parameters_df, left_obj=left_obj, right_obj=right_obj, dlc=False)
-        disc_ind_dlc, disc_ind_deg = disc_index(metadata, parameters_df, left_obj=left_obj, right_obj=right_obj, dlc=False)
-        #median_speed_val = median_speed(parameters_df)
-        #distance_per_min = full_distance(parameters_df)
-        #immobile_percentage = full_immobile_time(parameters_df)
+        if analyze_stim_inv_to_total:
+            perc_total_inv_dlc, perc_total_inv_deg, exp_or_hab = percent_of_total_inv_time(metadata,parameters_df, left_obj=left_obj, right_obj=right_obj)       
+            if not p_parameters_df_initialized:
+                p_parameters["Stimulus to total investigation DLC [%]"] = perc_total_inv_dlc
+                p_parameters["Stimulus to total investigation DEG [%]"] = perc_total_inv_deg
+            elif p_parameters_df_initialized:
+                    p_parameters.append(perc_total_inv_dlc)
+                    p_parameters.append(perc_total_inv_deg) 
+                           
+        if analyze_total_inv:
+            total_inv_dlc, total_inv_deg = total_inv_time(metadata, parameters_df, left_obj=left_obj, right_obj=right_obj)
+            if not p_parameters_df_initialized:
+                p_parameters["Total investigation time DLC [%]"] = total_inv_dlc
+                p_parameters["Total investigation time DEG [%]"] = total_inv_deg
+            elif p_parameters_df_initialized:
+                    p_parameters.append(total_inv_dlc)
+                    p_parameters.append(total_inv_deg)
+        
+        if analyze_discrimination:
+            disc_ind_dlc, disc_ind_deg = disc_index(metadata, parameters_df, left_obj=left_obj, right_obj=right_obj)
+            if not p_parameters_df_initialized:
+                p_parameters["Discrimination Index DLC"] = disc_ind_dlc
+                p_parameters["Discrimination Index DEG"] = disc_ind_deg
+            elif p_parameters_df_initialized:
+                    p_parameters.append(disc_ind_dlc)
+                    p_parameters.append(disc_ind_deg)
+        
+        if analyze_bouts:
+            if analyze_deg_stim_bouts:
+                deg_stim_event_count, deg_stim_average_bout_length, deg_stim_sd_bout_length, deg_stim_sem_bout_length = analyze_ethogram(metadata,
+                                                                                                                                         parameters_df,
+                                                                                                                                         left_obj=left_obj,
+                                                                                                                                         right_obj=right_obj,
+                                                                                                                                         dlc_or_deg="deg",
+                                                                                                                                         control_or_stim="stim")
+                if not p_parameters_df_initialized:
+                    p_parameters["Stimulus investigation events DEG"] = deg_stim_event_count
+                    p_parameters["Stimulus investigation average bout length DEG"] = deg_stim_average_bout_length
+                    p_parameters["Stimulus investigation SD bout length DEG"] = deg_stim_sd_bout_length
+                    p_parameters["Stimulus investigation SEM bout length DEG"] = deg_stim_sem_bout_length
+                elif p_parameters_df_initialized:
+                    p_parameters.append(deg_stim_event_count)
+                    p_parameters.append(deg_stim_average_bout_length)
+                    p_parameters.append(deg_stim_sd_bout_length)
+                    p_parameters.append(deg_stim_sem_bout_length)
+
+            if analyze_deg_con_bouts:
+                deg_con_event_count, deg_con_average_bout_length, deg_con_sd_bout_length, deg_con_sem_bout_length = analyze_ethogram(metadata,
+                                                                                                                                     parameters_df,
+                                                                                                                                     left_obj=left_obj,
+                                                                                                                                     right_obj=right_obj,
+                                                                                                                                     dlc_or_deg="deg",
+                                                                                                                                     control_or_stim="con")
+                if not p_parameters_df_initialized:
+                    p_parameters["Water investigation events DEG"] = deg_con_event_count
+                    p_parameters["Water investigation average bout length DEG"] = deg_con_average_bout_length
+                    p_parameters["Water investigation SD bout length DEG"] = deg_con_sd_bout_length
+                    p_parameters["Water investigation SEM bout length DEG"] = deg_con_sem_bout_length
+                elif p_parameters_df_initialized:
+                    p_parameters.append(deg_con_event_count)
+                    p_parameters.append(deg_con_average_bout_length)
+                    p_parameters.append(deg_con_sd_bout_length)
+                    p_parameters.append(deg_con_sem_bout_length)
+            
+            if analyze_dlc_stim_bouts:
+                dlc_stim_event_count, dlc_stim_average_bout_length, dlc_stim_sd_bout_length, dlc_stim_sem_bout_length = analyze_ethogram(metadata,
+                                                                                                                                         parameters_df,
+                                                                                                                                         left_obj=left_obj,
+                                                                                                                                         right_obj=right_obj,
+                                                                                                                                         dlc_or_deg="dlc", 
+                                                                                                                                         control_or_stim="stim")
+                if not p_parameters_df_initialized:
+                    p_parameters["Stimulus investigation events DLC"] = dlc_stim_event_count
+                    p_parameters["Stimulus investigation average bout length DLC"] = dlc_stim_average_bout_length
+                    p_parameters["Stimulus investigation SD bout length DLC"] = dlc_stim_sd_bout_length
+                    p_parameters["Stimulus investigation SEM bout length DLC"] = dlc_stim_sem_bout_length
+                elif p_parameters_df_initialized:
+                    p_parameters.append(dlc_stim_event_count)
+                    p_parameters.append(dlc_stim_average_bout_length)
+                    p_parameters.append(dlc_stim_sd_bout_length)
+                    p_parameters.append(dlc_stim_sem_bout_length)
+
+            if analyze_dlc_con_bouts:
+                dlc_con_event_count, dlc_con_average_bout_length, dlc_con_sd_bout_length, dlc_con_sem_bout_length = analyze_ethogram(metadata, 
+                                                                                                                                     parameters_df,
+                                                                                                                                     left_obj=left_obj,
+                                                                                                                                     right_obj=right_obj,
+                                                                                                                                     dlc_or_deg="dlc",
+                                                                                                                                     control_or_stim="con")
+                if not p_parameters_df_initialized:
+                    p_parameters["Water investigation events DLC"] = dlc_con_event_count
+                    p_parameters["Water investigation average bout length DLC"] = dlc_con_average_bout_length
+                    p_parameters["Water investigation SD bout length DLC"] = dlc_con_sd_bout_length
+                    p_parameters["Water investigation SEM bout length DLC"] = dlc_con_sem_bout_length
+                elif p_parameters_df_initialized:
+                    p_parameters.append(dlc_con_event_count)
+                    p_parameters.append(dlc_con_average_bout_length)
+                    p_parameters.append(dlc_con_sd_bout_length)
+                    p_parameters.append(dlc_con_sem_bout_length)
+        if analyze_movement:
+
+            median_speed_val = median_speed(parameters_df)
+            distance_per_min = full_distance(parameters_df)
+            immobile_percentage = full_immobile_time(parameters_df)
+
+            if not p_parameters_df_initialized:
+                p_parameters["Median speed [km/h]"] = median_speed_val
+                p_parameters["Distance per minute [m]"] = distance_per_min
+                p_parameters["Immobile time [%]"] = immobile_percentage
+
+            elif p_parameters_df_initialized:
+                p_parameters.append(median_speed_val)
+                p_parameters.append(distance_per_min)
+                p_parameters.append(immobile_percentage)
+
 
         #metadata = get_metadata(file)
-
+        """
         if not p_parameters_df_initialized:
             p_parameters = {
-                            #"Stimulus to total investigation DLC [%]": perc_total_inv_dlc,
-                            #"Total investigation time DLC [%]": total_inv_dlc,
-                            #"Discrimination Index DLC": disc_ind_dlc,
+                            "Stimulus to total investigation DLC [%]": perc_total_inv_dlc,
+                            "Total investigation time DLC [%]": total_inv_dlc,
+                            "Discrimination Index DLC": disc_ind_dlc,
+                            "Stimulus investigation events DLC": dlc_stim_event_count,
                             "Stimulus to total investigation DEG [%]": perc_total_inv_deg,
                             "Total investigation time DEG [%]": total_inv_deg,
                             "Discrimination Index DEG": disc_ind_deg,
-                            #"Median speed [km/h]": median_speed_val,
-                            #"Distance per minute [m]": distance_per_min,
-                            #"Immobile time [%]": immobile_percentage
+                            "Median speed [km/h]": median_speed_val,
+                            "Distance per minute [m]": distance_per_min,
+                            "Immobile time [%]": immobile_percentage
                             }
             p_parameters_df = ini_processed_parameters_df(processed_parameters=p_parameters, metadata_dic=metadata)
             p_parameters_df_initialized = True
 
         elif p_parameters_df_initialized:
             p_parameters = [
-                            #perc_total_inv_dlc, 
-                            #total_inv_dlc,
-                            #disc_ind_dlc,
+                            perc_total_inv_dlc, 
+                            total_inv_dlc,
+                            disc_ind_dlc,
+                            dlc_stim_event_count,
                             perc_total_inv_deg,
                             total_inv_deg,
                             disc_ind_deg,
-                            #median_speed_val,
-                            #distance_per_min,
-                            #immobile_percentage
+                            median_speed_val,
+                            distance_per_min,
+                            immobile_percentage
                             ]
             p_parameters_df = append_processed_parameters_df(processed_parameters_df=p_parameters_df,processed_parameters=p_parameters,metadata_dic=metadata)
-
+        """
+        if not p_parameters_df_initialized:
+            p_parameters_df = ini_processed_parameters_df(processed_parameters=p_parameters, metadata_dic=metadata)
+            p_parameters_df_initialized = True
+        elif p_parameters_df_initialized:
+            p_parameters_df = append_processed_parameters_df(processed_parameters_df=p_parameters_df,processed_parameters=p_parameters,metadata_dic=metadata)
         # parameter file goes to the respective 'done' folder
         if move_para_file:
             shutil.move(file, path_parameters_done)
@@ -359,7 +520,7 @@ if run_postprocessing:
 
 if make_plots:
     
-    path_parameters = f"{project_path}/processed/parameters/done/*.csv"
+    path_parameters = f"{project_path}/processed/parameters/new/*.csv"
     path_save_figs = f"{project_path}/figures/"
     file_list_parameters = glob.glob(path_parameters)
 
@@ -481,26 +642,25 @@ if make_plots:
 
     if make_grouped_eventplots:
         # skip frames for less data
-        stepsize_skip = 50
+        stepsize_skip = 2
         start = 0
-        stop = 15000
+        stop = 30000
         # what columns?
-        ai = "dlc"
+        ai = "deg"
 
 
         if ai == "deg":
             line_color = "magenta"
-            left_col = "deg_is_investigating_left_dish"
-            right_col = "deg_is_investigating_right_dish"
+            left_col = "deg_is_investigating_leftpetridish"
+            right_col = "deg_is_investigating_rightpetridish"
         else:
             line_color = "yellow"
-            left_col = "is_investigating_left_dish"
-            right_col = "is_investigating_right_dish"
+            left_col = "is_investigating_leftpetridish"
+            right_col = "is_investigating_rightpetridish"
         # here the data will be stored
         data_stim = []
         data_con = []
-        # how many frames should be used?
-        frame_max = 6000 # would be first third of my data
+
         # generate empty figure
         fig, ax = plt.subplots()
         # get data first
@@ -535,8 +695,14 @@ if make_plots:
         #    ax.vlines(x=array, ymin=i, ymax=i+1, color='yellow', linestyle='--', alpha=0.7)
         # Set background color of the plot area
         ax.set_facecolor('black')
-        
+        ax.set_title("involuntary urine")
+        ax.title.set_color("white")
+        ax.set_xlabel("frames")
+        #ax.xlabel.set_color("white")
+        ax.set_ylabel("videos")
+        #ax.ylabel.set_color("white")
         # Set color of axes and labels
+        ax.set_ylim(bottom=0,top=18)
         ax.spines['bottom'].set_color('white')
         ax.spines['left'].set_color('white')
         ax.xaxis.label.set_color('white')
@@ -544,7 +710,7 @@ if make_plots:
         ax.tick_params(axis='x', colors='white')
         ax.tick_params(axis='y', colors='white')
         #plt.show()
-        plt.savefig(f"{project_path}/figures/{ai}_ethograms_15000frames_skip{stepsize_skip}.svg", format='svg', facecolor="black")
+        plt.savefig(f"{project_path}/figures/involuntary_{ai}_ethograms_30000frames_skip{stepsize_skip}.svg", format='svg', facecolor="black")
         
 
             

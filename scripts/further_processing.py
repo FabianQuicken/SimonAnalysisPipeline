@@ -1,5 +1,6 @@
 import numpy as np
 import statistics
+import math
 
 def get_paradigm(metadata, parameter_df, left_obj, right_obj):
     if "habituation" in metadata["paradigm"].lower():
@@ -47,7 +48,25 @@ def get_paradigm(metadata, parameter_df, left_obj, right_obj):
     return exp_or_hab, urine_stim, control_stim, urine_stim_deg, control_stim_deg
     
     
+def get_behavior_sum(metadata, parameter_df, left_obj, right_obj, dlc=True, deg=True):
+    """
+    Gets the sum of both investigation behaviors normalized to the experiment duration
+    """
+    exp_or_hab, urine_stim, control_stim, urine_stim_deg, control_stim_deg = get_paradigm(metadata, parameter_df, left_obj, right_obj)
+    if dlc:
+        dlc_calc_stim = np.nansum(urine_stim) / (len(urine_stim)) * 100
+        dlc_calc_con = np.nansum(control_stim) / (len(control_stim)) * 100
+    else:
+        dlc_calc_stim = None
+        dlc_calc_con = None
+    if deg:
+        deg_calc_stim = np.nansum(urine_stim_deg) / (len(urine_stim_deg)) * 100
+        deg_calc_con = np.nansum(control_stim_deg) / (len(control_stim_deg)) * 100
+    else:
+        deg_calc_stim = None
+        deg_calc_con = None
 
+    return dlc_calc_stim, dlc_calc_con, deg_calc_stim, deg_calc_con, exp_or_hab
 
 
 def percent_of_total_inv_time(metadata, parameter_df, left_obj, right_obj, dlc=True, deg=True):
@@ -114,6 +133,58 @@ def full_immobile_time(parameter_df):
     immobile_time = np.array(immobile_time)
     immobile_time = np.nansum(immobile_time)/np.count_nonzero(~np.isnan(immobile_time)) * 100
     return immobile_time
+
+def analyze_ethogram(metadata, parameter_df, left_obj, right_obj, dlc_or_deg = "deg", control_or_stim = "stim"):
+
+    exp_or_hab, urine_stim, control_stim, urine_stim_deg, control_stim_deg = get_paradigm(metadata, parameter_df, left_obj, right_obj)
+
+    if dlc_or_deg == "deg":
+        if control_or_stim == "stim": 
+            arr = urine_stim_deg
+        else:
+            arr = control_stim_deg
+    else:
+        if control_or_stim == "stim":
+            arr = urine_stim
+        else:
+            arr = control_stim
+
+    event_count = 0
+    bout_lengths = []
+    current_bout_length = 0
+    in_bout = False
+    
+    for i in range(len(arr)):
+        if arr[i] == 1:
+            if not in_bout:
+                in_bout = True
+                event_count += 1
+            current_bout_length += 1
+        else:
+            if in_bout:
+                in_bout = False
+                bout_lengths.append(current_bout_length)
+                current_bout_length = 0
+    
+    # Append the last bout if it ends at the end of the array
+    if in_bout:
+        bout_lengths.append(current_bout_length)
+    
+
+    if bout_lengths:
+        # Calculate the average bout length
+        average_bout_length = sum(bout_lengths) / len(bout_lengths)
+        # Calculate standard deviation
+        sd_bout_length = statistics.stdev(bout_lengths)
+        # Calculate standard error of the mean
+        sem_bout_length = sd_bout_length / math.sqrt(len(bout_lengths))
+    else:
+        average_bout_length = 0
+        sd_bout_length = 0
+        sem_bout_length = 0
+    
+    return event_count, average_bout_length, sd_bout_length, sem_bout_length
+
 
 
 

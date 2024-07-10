@@ -1,13 +1,13 @@
 import pandas as pd
 from get_metadata import get_metadata
 
-def find_parameter_file(deg_file=str, metadata_dic=dict, parameter_paths=list):
+def find_parameter_file(deg_file=str, metadata_dic=dict, parameter_paths=list, experiment=str):
     """
     Compares the metadata of the selected DeepEthogram csv file and compares it to existing parameter files metadata.
     If it finds a file with a matching date, mouse and paradigm, the parameters df gets read and returned.
     """
     for path in parameter_paths:
-        parameter_metadata = get_metadata(path)
+        parameter_metadata = get_metadata(path, experiment=experiment)
         print(f"para metadata: {parameter_metadata}")
         print(f"metadata_dic: {metadata_dic}")
         try:
