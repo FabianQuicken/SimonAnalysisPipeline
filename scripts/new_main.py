@@ -24,7 +24,7 @@ from figures import eventplot, pieplot, plot_cum_dist, plot_distance_val, prepar
 # # # # Define your experiment here # # # #
 
 # define the project path - head directory of your specific dataset, that should be analyzed similarly
-project_path = "./datasets/testing"
+project_path = "./datasets/SH_V_vs_I_drittel"
 # if there is a specific naming convention, code needs to be passed to the get_metadata()
 # basic convention is: "date_camera_mouse_paradigm_paradigm_paradigm"
 # right now, "vol_vs_invol" is an extra option - use None for others!
@@ -72,13 +72,13 @@ if dlc_analysis:
     save_bodyparts = True
 
     # do you want to save the calculated parameters to a csv?
-    save_parameters = False
+    save_parameters = True
 
     # do you want to move the raw dlc csv's from 'new' to 'done' folder?
     move_raw_csv = True
 
 # do you want to add deg data to existing parameter files?
-add_deg_data = False
+add_deg_data = True
 if add_deg_data:
     # is there a parameter csv initialized (due to previous DLC analysis)?
     parameter_csv_present = True
@@ -94,7 +94,7 @@ if add_deg_data:
     move_deg_csv = True
 
 # do you want to do postprocessing?
-run_postprocessing = False
+run_postprocessing = True
 if run_postprocessing:
     # do you want to calculate the total time in % of each behavior?
     analyze_sum_behavior = True
@@ -118,7 +118,7 @@ if run_postprocessing:
     # do you want to analyze movement behavior? (median speed, distance travelled and immobile time)
     analyze_movement = True
     # should the parameter file be moved in the 'done' directory?
-    move_para_file = False
+    move_para_file = True
 
 make_plots = False
 
