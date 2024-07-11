@@ -208,6 +208,40 @@ def immobile_time(speed_values, immobile_threshold = 0.1):
             is_immobile[i] = np.nan
     return is_immobile
 
+def punkt_in_viereck(punkt, eckpunkte):
+    x, y = punkt
+
+    # Überprüfen, ob der Punkt links oder rechts von der Fläche liegt
+    if x < min(eckpunkte[0][0], eckpunkte[1][0], eckpunkte[2][0], eckpunkte[3][0]) or \
+       x > max(eckpunkte[0][0], eckpunkte[1][0], eckpunkte[2][0], eckpunkte[3][0]):
+        return False
+
+    # Überprüfen, ob der Punkt über oder unter der Fläche liegt
+    if y < min(eckpunkte[0][1], eckpunkte[1][1], eckpunkte[2][1], eckpunkte[3][1]) or \
+       y > max(eckpunkte[0][1], eckpunkte[1][1], eckpunkte[2][1], eckpunkte[3][1]):
+        return False
+
+    # Überprüfen, ob der Punkt innerhalb der Fläche liegt
+    # Verwendung der "Point-in-Polygon"-Methode
+    n = len(eckpunkte)
+    inside = False
+    p1x, p1y = eckpunkte[0]
+    for i in range(n + 1):
+        p2x, p2y = eckpunkte[i % n]
+        if y > min(p1y, p2y):
+            if y <= max(p1y, p2y):
+                if x <= max(p1x, p2x):
+                    if p1y != p2y:
+                        xinters = (y - p1y) * (p2x - p1x) / (p2y - p1y) + p1x
+                    if p1x == p2x or x <= xinters:
+                        inside = not inside
+        p1x, p1y = p2x, p2y
+
+    return inside
+
+
+
+
 def calc_interior_zone_polygon(df, bodypart=str):
     "Normally, the nose should be used because it indicates the orientation of the mouse best."
     data = df.copy()
@@ -235,23 +269,14 @@ def calc_interior_zone_polygon(df, bodypart=str):
 
     bodypart_x = np.array(bodypart_x)
     bodypart_y = np.array(bodypart_y)
-    topleft_x = np.array(topleft_x)
-    topleft_y = np.array(topleft_y)
-    topright_x = np.array(topright_x)
-    topright_y = np.array(topright_y)
-    bottomleft_x = np.array(bottomleft_x)
-    bottomleft_y = np.array(bottomleft_y)
-    bottomright_x = np.array(bottomright_x)
-    bottomright_y = np.array(bottomright_y)
-
-    topleft_x = topleft_x[0]
-    topleft_y = topleft_y[0]
-    topright_x = topright_x[0]
-    topright_y = topright_y[0]
-    bottomleft_x = bottomleft_x[0]
-    bottomleft_y = bottomleft_y[0]
-    bottomright_x = bottomright_x[0]
-    bottomright_y = bottomright_y[0]
+    topleft_x = np.array(topleft_x)[0]
+    topleft_y = np.array(topleft_y)[0]
+    topright_x = np.array(topright_x)[0]
+    topright_y = np.array(topright_y)[0]
+    bottomleft_x = np.array(bottomleft_x)[0]
+    bottomleft_y = np.array(bottomleft_y)[0]
+    bottomright_x = np.array(bottomright_x)[0]
+    bottomright_y = np.array(bottomright_y)[0]
 
     old_coords = [(topleft_x, topleft_y), (topright_x, topright_y), (bottomleft_x,bottomleft_y), (bottomright_x, bottomright_y)]
 

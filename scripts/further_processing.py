@@ -170,15 +170,22 @@ def analyze_ethogram(metadata, parameter_df, left_obj, right_obj, dlc_or_deg = "
     if in_bout:
         bout_lengths.append(current_bout_length)
     
+    try:
 
-    if bout_lengths:
-        # Calculate the average bout length
-        average_bout_length = sum(bout_lengths) / len(bout_lengths)
-        # Calculate standard deviation
-        sd_bout_length = statistics.stdev(bout_lengths)
-        # Calculate standard error of the mean
-        sem_bout_length = sd_bout_length / math.sqrt(len(bout_lengths))
-    else:
+        if bout_lengths:
+            # Calculate the average bout length
+            average_bout_length = sum(bout_lengths) / len(bout_lengths)
+            # Calculate standard deviation
+            sd_bout_length = statistics.stdev(bout_lengths)
+            # Calculate standard error of the mean
+            sem_bout_length = sd_bout_length / math.sqrt(len(bout_lengths))
+        else:
+            average_bout_length = 0
+            sd_bout_length = 0
+            sem_bout_length = 0
+
+    except:
+        print("Error during average/sem/sd bot length calculation")
         average_bout_length = 0
         sd_bout_length = 0
         sem_bout_length = 0
