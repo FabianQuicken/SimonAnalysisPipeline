@@ -1,6 +1,6 @@
 import numpy as np
 import pandas as pd
-from mathematics import euklidean_distance
+from mathematics import euklidean_distance, punkt_in_viereck
 from likelihood_filter import likelihood_filtering,likelihood_filtering_nans
 
 pixel_per_cm=34.77406
@@ -208,40 +208,6 @@ def immobile_time(speed_values, immobile_threshold = 0.1):
             is_immobile[i] = np.nan
     return is_immobile
 
-def punkt_in_viereck(punkt, eckpunkte):
-    x, y = punkt
-
-    # Überprüfen, ob der Punkt links oder rechts von der Fläche liegt
-    if x < min(eckpunkte[0][0], eckpunkte[1][0], eckpunkte[2][0], eckpunkte[3][0]) or \
-       x > max(eckpunkte[0][0], eckpunkte[1][0], eckpunkte[2][0], eckpunkte[3][0]):
-        return False
-
-    # Überprüfen, ob der Punkt über oder unter der Fläche liegt
-    if y < min(eckpunkte[0][1], eckpunkte[1][1], eckpunkte[2][1], eckpunkte[3][1]) or \
-       y > max(eckpunkte[0][1], eckpunkte[1][1], eckpunkte[2][1], eckpunkte[3][1]):
-        return False
-
-    # Überprüfen, ob der Punkt innerhalb der Fläche liegt
-    # Verwendung der "Point-in-Polygon"-Methode
-    n = len(eckpunkte)
-    inside = False
-    p1x, p1y = eckpunkte[0]
-    for i in range(n + 1):
-        p2x, p2y = eckpunkte[i % n]
-        if y > min(p1y, p2y):
-            if y <= max(p1y, p2y):
-                if x <= max(p1x, p2x):
-                    if p1y != p2y:
-                        xinters = (y - p1y) * (p2x - p1x) / (p2y - p1y) + p1x
-                    if p1x == p2x or x <= xinters:
-                        inside = not inside
-        p1x, p1y = p2x, p2y
-
-    return inside
-
-
-
-
 def calc_interior_zone_polygon(df, bodypart=str):
     "Normally, the nose should be used because it indicates the orientation of the mouse best."
     data = df.copy()
@@ -257,7 +223,7 @@ def calc_interior_zone_polygon(df, bodypart=str):
     for corner in corners:
         data = likelihood_filtering(df=data, 
                                     likelihood_row_name=f"{corner}_likelihood",
-                                    filter_val=0.95)
+                                    filter_val=0.99)
     topleft_x = data["topleft_x"]
     topleft_y = data["topleft_y"]
     topright_x = data["topright_x"]
@@ -278,20 +244,36 @@ def calc_interior_zone_polygon(df, bodypart=str):
     bottomright_x = np.array(bottomright_x)[0]
     bottomright_y = np.array(bottomright_y)[0]
 
-    old_coords = [(topleft_x, topleft_y), (topright_x, topright_y), (bottomleft_x,bottomleft_y), (bottomright_x, bottomright_y)]
+    #original_corners = [(topleft_x, topleft_y), (topright_x, topright_y), (bottomleft_x,bottomleft_y), (bottomright_x, bottomright_y)]
+    scaling_factor = 0.1
 
-    # Calculate the centroid of the polygon
-    centroid_x = sum([x for x, y in old_coords]) / len(old_coords)
-    centroid_y = sum([y for x, y in old_coords]) / len(old_coords)
+    topleft_x += (topright_x - topleft_x) * scaling_factor
+    topleft_y += (bottomleft_y - topleft_y) * scaling_factor
+    topright_x -= (topright_x - topleft_x) * scaling_factor
+    topright_y += (bottomright_y - topright_y) * scaling_factor
+    bottomleft_x += (bottomright_x - bottomleft_x) * scaling_factor
+    bottomleft_y -= (bottomleft_y - topleft_y) * scaling_factor
+    bottomright_x -= (bottomright_x - bottomleft_x) * scaling_factor
+    bottomright_y -= (bottomright_y - topright_y) * scaling_factor
 
-    # Scale each point towards the centroid
-    new_coords = []
-    for x, y in old_coords:
-        new_x = centroid_x + (x - centroid_x) * 0.8
-        new_y = centroid_y + (y - centroid_y) * 0.8
-        new_coords.append((new_x, new_y))
+    scaled_corners = [(bottomleft_x,bottomleft_y), (bottomright_x, bottomright_y), (topright_x, topright_y), (topleft_x, topleft_y)]
 
-    pass
+    return (bodypart_x, bodypart_y), scaled_corners
+
+def calc_edge_time(nose_coords=tuple, scaled_corner_coords=list):
+    """
+    nose_coords should be a tuple of two list containing x and y coordinates, respectively.
+    scaled_orner_coords should be a list containing tuples of the scaled corner coordinates
+    """
+    nose_x = nose_coords[0]
+    nose_y = nose_coords[1]
+    edge_time = np.zeros(len(nose_x))
+
+    for i in range(len(nose_x)):
+        inside = punkt_in_viereck(punkt=(nose_x[i], nose_y[i]), eckpunkte=scaled_corner_coords)
+        if not inside:
+            edge_time[i] = 1
+    return edge_time
 
 
 

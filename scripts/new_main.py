@@ -11,8 +11,8 @@ import seaborn as sns
 from get_metadata import get_metadata
 from get_bodyparts_from_DLC import rewrite_dataframe, get_bodypart
 from save_to_csv import metadata_bodyparts_to_csv, parameters_to_csv, ini_processed_parameters_df, append_processed_parameters_df, save_hab_exp
-from calculate_parameters import distance_travelled, calculate_speed, distance_bodypart_object,time_spent_sides,investigation_time,immobile_time
-from further_processing import percent_of_total_inv_time, disc_index, total_inv_time, median_speed, full_distance, full_immobile_time, analyze_ethogram, get_behavior_sum
+from calculate_parameters import distance_travelled, calculate_speed, distance_bodypart_object,time_spent_sides,investigation_time,immobile_time, calc_interior_zone_polygon, calc_edge_time
+from further_processing import percent_of_total_inv_time, disc_index, total_inv_time, median_speed, full_distance, full_immobile_time, analyze_ethogram, get_behavior_sum, total_cage_edge_time
 from get_parameters import find_parameter_file
 from configurations import dlc_petridish_layout_fabi, dlc_petridish_layout_simon, dlc_mighty_snicket_layout_simon
 from split_exp_hab import split_csv, split_csv_chatgpt
@@ -24,7 +24,7 @@ from figures import eventplot, pieplot, plot_cum_dist, plot_distance_val, prepar
 # # # # Define your experiment here # # # #
 
 # define the project path - head directory of your specific dataset, that should be analyzed similarly
-project_path = "./datasets/SH_V_vs_I_drittel"
+project_path = "./datasets/testing"
 # if there is a specific naming convention, code needs to be passed to the get_metadata()
 # basic convention is: "date_camera_mouse_paradigm_paradigm_paradigm"
 # right now, "vol_vs_invol" is an extra option - use None for others!
@@ -50,6 +50,10 @@ if dlc_analysis:
     calc_immobile_time = True
     # below what speed threshold [km/h] the animal is defined immobile?
     immobile_threshold = 0.1
+
+    calc_cage_edge_time = True
+    # what bodypart should be checked for being close at the edges?
+    edge_bodypart = "nose"
 
     calc_dist_left_object = True
     calc_dist_right_object = True
@@ -196,6 +200,11 @@ if dlc_analysis:
                 immobile_speeds[i] = immobile_threshold
             parameters["is_immobile"] = is_immobile
             parameters["immobile_threshold[km/h]"] = immobile_speeds
+
+        if calc_cage_edge_time:
+            nose_coords, scaled_corner_coords = calc_interior_zone_polygon(df=new_df, bodypart=edge_bodypart)
+            edge_time = calc_edge_time(nose_coords, scaled_corner_coords)
+            parameters[f"is close to edge"] = edge_time
 
         if calc_dist_left_object:
             distance_to_left_object = distance_bodypart_object(df=new_df,bodypart=obj_dist_bodypart,object=left_obj)
@@ -459,16 +468,19 @@ if run_postprocessing:
             median_speed_val = median_speed(parameters_df)
             distance_per_min = full_distance(parameters_df)
             immobile_percentage = full_immobile_time(parameters_df)
+            cage_edge_time_percentage = total_cage_edge_time(parameters_df)
 
             if not p_parameters_df_initialized:
                 p_parameters["Median speed [km/h]"] = median_speed_val
                 p_parameters["Distance per minute [m]"] = distance_per_min
                 p_parameters["Immobile time [%]"] = immobile_percentage
+                p_parameters["At cage edge [%]"] = cage_edge_time_percentage
 
             elif p_parameters_df_initialized:
                 p_parameters.append(median_speed_val)
                 p_parameters.append(distance_per_min)
                 p_parameters.append(immobile_percentage)
+                p_parameters.append(cage_edge_time_percentage)
 
 
         #metadata = get_metadata(file)

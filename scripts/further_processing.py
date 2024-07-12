@@ -125,6 +125,15 @@ def full_distance(parameter_df):
     distance = np.nansum(distance_travelled)/np.count_nonzero(~np.isnan(distance_travelled)) * 3600
     return distance
 
+def total_cage_edge_time(parameter_df):
+    """
+    Returns the % of time the mouse was close to the cage edges during the recording. 
+    """
+    edge_time = parameter_df["is close to edge"]
+    edge_time = np.array(edge_time)
+    total_edge_time = np.nansum(edge_time)/np.count_nonzero(~np.isnan(edge_time)) * 100
+    return total_edge_time
+
 def full_immobile_time(parameter_df):
     """
     Return the % of time the mouse was immobile during the recording.
