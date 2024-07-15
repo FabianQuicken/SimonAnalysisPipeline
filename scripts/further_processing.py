@@ -19,6 +19,11 @@ def get_paradigm(metadata, parameter_df, left_obj, right_obj):
             control_stim_deg = parameter_df[f"deg_is_investigating_{left_obj}"]
         except:
             print("No deg data available.")
+        try:
+            urine_stim_asoid = parameter_df[f"asoid_is_investigating_{right_obj}"]
+            control_stim_asoid = parameter_df[f"asoid_is_investigating_{left_obj}"]
+        except:
+            print("No A-Soid data available.")
         
     elif "left" in metadata["paradigm"]:
         try:
@@ -31,6 +36,11 @@ def get_paradigm(metadata, parameter_df, left_obj, right_obj):
             control_stim_deg = parameter_df[f"deg_is_investigating_{right_obj}"]
         except:
             print("No deg data available.")
+        try:
+            urine_stim_asoid = parameter_df[f"asoid_is_investigating_{left_obj}"]
+            control_stim_asoid = parameter_df[f"asoid_is_investigating_{right_obj}"]
+        except:
+            print("No A-Soid data available.")
         
     try:
         urine_stim = np.array(urine_stim)
@@ -44,15 +54,21 @@ def get_paradigm(metadata, parameter_df, left_obj, right_obj):
     except:
         urine_stim_deg = np.zeros(len(parameter_df))
         control_stim_deg = np.zeros(len(parameter_df))
+    try:
+        urine_stim_asoid = np.array(urine_stim_asoid)
+        control_stim_asoid = np.array(control_stim_asoid)
+    except:
+        urine_stim_asoid = np.zeros(len(parameter_df))
+        control_stim_asoid = np.zeros(len(parameter_df))
 
-    return exp_or_hab, urine_stim, control_stim, urine_stim_deg, control_stim_deg
+    return exp_or_hab, urine_stim, control_stim, urine_stim_deg, control_stim_deg, urine_stim_asoid, control_stim_asoid
     
     
-def get_behavior_sum(metadata, parameter_df, left_obj, right_obj, dlc=True, deg=True):
+def get_behavior_sum(metadata, parameter_df, left_obj, right_obj, dlc=True, deg=True, asoid=True):
     """
     Gets the sum of both investigation behaviors normalized to the experiment duration
     """
-    exp_or_hab, urine_stim, control_stim, urine_stim_deg, control_stim_deg = get_paradigm(metadata, parameter_df, left_obj, right_obj)
+    exp_or_hab, urine_stim, control_stim, urine_stim_deg, control_stim_deg, urine_stim_asoid, control_stim_asoid = get_paradigm(metadata, parameter_df, left_obj, right_obj)
     if dlc:
         dlc_calc_stim = np.nansum(urine_stim) / (len(urine_stim)) * 100
         dlc_calc_con = np.nansum(control_stim) / (len(control_stim)) * 100
@@ -65,13 +81,19 @@ def get_behavior_sum(metadata, parameter_df, left_obj, right_obj, dlc=True, deg=
     else:
         deg_calc_stim = None
         deg_calc_con = None
+    if asoid:
+        asoid_calc_stim = np.nansum(urine_stim_asoid) / (len(urine_stim_asoid)) * 100
+        asoid_calc_con = np.nansum(control_stim_asoid) / (len(control_stim_asoid)) * 100
+    else:
+        asoid_calc_stim = None
+        asoid_calc_con = None
 
-    return dlc_calc_stim, dlc_calc_con, deg_calc_stim, deg_calc_con, exp_or_hab
+    return dlc_calc_stim, dlc_calc_con, deg_calc_stim, deg_calc_con, asoid_calc_stim, asoid_calc_con, exp_or_hab
 
 
-def percent_of_total_inv_time(metadata, parameter_df, left_obj, right_obj, dlc=True, deg=True):
+def percent_of_total_inv_time(metadata, parameter_df, left_obj, right_obj, dlc=True, deg=True, asoid=True):
 
-    exp_or_hab, urine_stim, control_stim, urine_stim_deg, control_stim_deg = get_paradigm(metadata, parameter_df, left_obj, right_obj)
+    exp_or_hab, urine_stim, control_stim, urine_stim_deg, control_stim_deg, urine_stim_asoid, control_stim_asoid = get_paradigm(metadata, parameter_df, left_obj, right_obj)
     if dlc:
         dlc_calc = np.nansum(urine_stim) / ((np.nansum(urine_stim) + np.nansum(control_stim))) * 100
     else:
@@ -80,13 +102,18 @@ def percent_of_total_inv_time(metadata, parameter_df, left_obj, right_obj, dlc=T
         deg_calc = np.nansum(urine_stim_deg) / ((np.nansum(urine_stim_deg) + np.nansum(control_stim_deg))) * 100
     else:
         deg_calc = None
+    if asoid:
+        asoid_calc = np.nansum(urine_stim_asoid) / ((np.nansum(urine_stim_asoid) + np.nansum(control_stim_asoid))) * 100
+    else:
+        asoid_calc = None
 
-    return dlc_calc, deg_calc, exp_or_hab
+
+    return dlc_calc, deg_calc, asoid_calc, exp_or_hab
 
 
-def disc_index(metadata, parameter_df, left_obj, right_obj, dlc=True, deg=True):
+def disc_index(metadata, parameter_df, left_obj, right_obj, dlc=True, deg=True, asoid=True):
 
-    exp_or_hab, urine_stim, control_stim, urine_stim_deg, control_stim_deg = get_paradigm(metadata, parameter_df, left_obj, right_obj)
+    exp_or_hab, urine_stim, control_stim, urine_stim_deg, control_stim_deg, urine_stim_asoid, control_stim_asoid = get_paradigm(metadata, parameter_df, left_obj, right_obj)
     if dlc:
         dlc_calc = (np.nansum(urine_stim) - np.nansum(control_stim)) / (np.nansum(urine_stim) + np.nansum(control_stim))
     else:
@@ -95,11 +122,15 @@ def disc_index(metadata, parameter_df, left_obj, right_obj, dlc=True, deg=True):
         deg_calc = (np.nansum(urine_stim_deg) - np.nansum(control_stim_deg)) / (np.nansum(urine_stim_deg) + np.nansum(control_stim_deg))
     else:
         deg_calc = None
-    return dlc_calc, deg_calc
+    if asoid:
+        asoid_calc = (np.nansum(urine_stim_asoid) - np.nansum(control_stim_asoid)) / (np.nansum(urine_stim_asoid) + np.nansum(control_stim_asoid))
+    else:
+        asoid_calc = None
+    return dlc_calc, deg_calc, asoid_calc
 
-def total_inv_time(metadata, parameter_df, left_obj, right_obj, dlc=True, deg=True):
+def total_inv_time(metadata, parameter_df, left_obj, right_obj, dlc=True, deg=True, asoid=True):
     
-    exp_or_hab, urine_stim, control_stim, urine_stim_deg, control_stim_deg = get_paradigm(metadata, parameter_df, left_obj, right_obj)
+    exp_or_hab, urine_stim, control_stim, urine_stim_deg, control_stim_deg, urine_stim_asoid, control_stim_asoid = get_paradigm(metadata, parameter_df, left_obj, right_obj)
     if dlc:
         dlc_calc = (np.nansum(urine_stim) + np.nansum(control_stim)) / np.count_nonzero(~np.isnan(urine_stim)) * 100
     else:
@@ -108,7 +139,11 @@ def total_inv_time(metadata, parameter_df, left_obj, right_obj, dlc=True, deg=Tr
         deg_calc = (np.nansum(urine_stim_deg) + np.nansum(control_stim_deg)) / np.count_nonzero(~np.isnan(urine_stim_deg)) * 100
     else: 
         deg_calc = None
-    return dlc_calc, deg_calc
+    if asoid:
+        asoid_calc = (np.nansum(urine_stim_asoid) + np.nansum(control_stim_asoid)) / np.count_nonzero(~np.isnan(urine_stim_asoid)) * 100
+    else: 
+        asoid_calc = None
+    return dlc_calc, deg_calc, asoid_calc
 
 def median_speed(parameter_df):
     median_speed = parameter_df["speed_in_km/h"]
@@ -145,18 +180,23 @@ def full_immobile_time(parameter_df):
 
 def analyze_ethogram(metadata, parameter_df, left_obj, right_obj, dlc_or_deg = "deg", control_or_stim = "stim"):
 
-    exp_or_hab, urine_stim, control_stim, urine_stim_deg, control_stim_deg = get_paradigm(metadata, parameter_df, left_obj, right_obj)
+    exp_or_hab, urine_stim, control_stim, urine_stim_deg, control_stim_deg,urine_stim_asoid, control_stim_asoid = get_paradigm(metadata, parameter_df, left_obj, right_obj)
 
     if dlc_or_deg == "deg":
         if control_or_stim == "stim": 
             arr = urine_stim_deg
         else:
             arr = control_stim_deg
-    else:
+    elif dlc_or_deg == "dlc":
         if control_or_stim == "stim":
             arr = urine_stim
         else:
             arr = control_stim
+    elif dlc_or_deg == "asoid":
+        if control_or_stim == "stim":
+            arr = urine_stim_asoid
+        else:
+            arr = control_stim_asoid
 
     event_count = 0
     bout_lengths = []

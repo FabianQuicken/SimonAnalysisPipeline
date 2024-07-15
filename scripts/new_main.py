@@ -438,47 +438,58 @@ if run_postprocessing:
         parameters_df = pd.read_csv(file)
         
         if analyze_sum_behavior:
-            dlc_calc_stim, dlc_calc_con, deg_calc_stim, deg_calc_con, exp_or_hab = get_behavior_sum(metadata,
+            dlc_calc_stim, dlc_calc_con, deg_calc_stim, deg_calc_con, asoid_calc_stim, asoid_calc_con, exp_or_hab = get_behavior_sum(metadata,
                                                                                                     parameters_df,
                                                                                                     left_obj=left_obj,
                                                                                                     right_obj=right_obj)
             if not p_parameters_df_initialized:
                 p_parameters["Stimulus investigation DLC [%]"] = dlc_calc_stim
                 p_parameters["Stimulus investigation DEG [%]"] = deg_calc_stim
+                p_parameters["Stimulus investigation Asoid [%]"] = asoid_calc_stim
                 p_parameters["Control investigation DLC [%]"] = dlc_calc_con
                 p_parameters["Control investigation DEG [%]"] = deg_calc_con
+                p_parameters["Control investigation Asoid [%]"] = asoid_calc_con
+                
             elif p_parameters_df_initialized:
                 p_parameters.append(dlc_calc_stim)
                 p_parameters.append(deg_calc_stim)
+                p_parameters.append(asoid_calc_con)
                 p_parameters.append(dlc_calc_con)
                 p_parameters.append(deg_calc_con)
+                p_parameters.append(asoid_calc_con)
 
         if analyze_stim_inv_to_total:
-            perc_total_inv_dlc, perc_total_inv_deg, exp_or_hab = percent_of_total_inv_time(metadata,parameters_df, left_obj=left_obj, right_obj=right_obj)       
+            perc_total_inv_dlc, perc_total_inv_deg, perc_total_inv_asoid, exp_or_hab = percent_of_total_inv_time(metadata,parameters_df, left_obj=left_obj, right_obj=right_obj)       
             if not p_parameters_df_initialized:
                 p_parameters["Stimulus to total investigation DLC [%]"] = perc_total_inv_dlc
                 p_parameters["Stimulus to total investigation DEG [%]"] = perc_total_inv_deg
+                p_parameters["Stimulus to total investigation Asoid [%]"] = perc_total_inv_asoid
             elif p_parameters_df_initialized:
                     p_parameters.append(perc_total_inv_dlc)
-                    p_parameters.append(perc_total_inv_deg) 
+                    p_parameters.append(perc_total_inv_deg)
+                    p_parameters.append(perc_total_inv_asoid) 
                            
         if analyze_total_inv:
-            total_inv_dlc, total_inv_deg = total_inv_time(metadata, parameters_df, left_obj=left_obj, right_obj=right_obj)
+            total_inv_dlc, total_inv_deg, total_inv_asoid = total_inv_time(metadata, parameters_df, left_obj=left_obj, right_obj=right_obj)
             if not p_parameters_df_initialized:
                 p_parameters["Total investigation time DLC [%]"] = total_inv_dlc
                 p_parameters["Total investigation time DEG [%]"] = total_inv_deg
+                p_parameters["Total investigation time Asoid [%]"] = total_inv_asoid
             elif p_parameters_df_initialized:
                     p_parameters.append(total_inv_dlc)
                     p_parameters.append(total_inv_deg)
+                    p_parameters.append(total_inv_asoid)
         
         if analyze_discrimination:
-            disc_ind_dlc, disc_ind_deg = disc_index(metadata, parameters_df, left_obj=left_obj, right_obj=right_obj)
+            disc_ind_dlc, disc_ind_deg, disc_ind_asoid = disc_index(metadata, parameters_df, left_obj=left_obj, right_obj=right_obj)
             if not p_parameters_df_initialized:
                 p_parameters["Discrimination Index DLC"] = disc_ind_dlc
                 p_parameters["Discrimination Index DEG"] = disc_ind_deg
+                p_parameters["Discrimination Index Asoid"] = disc_ind_asoid
             elif p_parameters_df_initialized:
                     p_parameters.append(disc_ind_dlc)
                     p_parameters.append(disc_ind_deg)
+                    p_parameters.append(disc_ind_asoid)
         
         if analyze_bouts:
             if analyze_deg_stim_bouts:
@@ -559,36 +570,36 @@ if run_postprocessing:
                                                                                                                                          parameters_df,
                                                                                                                                          left_obj=left_obj,
                                                                                                                                          right_obj=right_obj,
-                                                                                                                                         dlc_or_deg="dlc", 
+                                                                                                                                         dlc_or_deg="asoid", 
                                                                                                                                          control_or_stim="stim")
                 if not p_parameters_df_initialized:
-                    p_parameters["Stimulus investigation events DLC"] = dlc_stim_event_count
-                    p_parameters["Stimulus investigation average bout length DLC"] = dlc_stim_average_bout_length
-                    p_parameters["Stimulus investigation SD bout length DLC"] = dlc_stim_sd_bout_length
-                    p_parameters["Stimulus investigation SEM bout length DLC"] = dlc_stim_sem_bout_length
+                    p_parameters["Stimulus investigation events Asoid"] = asoid_stim_event_count
+                    p_parameters["Stimulus investigation average bout length Asoid"] = asoid_stim_average_bout_length
+                    p_parameters["Stimulus investigation SD bout length Asoid"] = asoid_stim_sd_bout_length
+                    p_parameters["Stimulus investigation SEM bout length Asoid"] = asoid_stim_sem_bout_length
                 elif p_parameters_df_initialized:
-                    p_parameters.append(dlc_stim_event_count)
-                    p_parameters.append(dlc_stim_average_bout_length)
-                    p_parameters.append(dlc_stim_sd_bout_length)
-                    p_parameters.append(dlc_stim_sem_bout_length)
+                    p_parameters.append(asoid_stim_event_count)
+                    p_parameters.append(asoid_stim_average_bout_length)
+                    p_parameters.append(asoid_stim_sd_bout_length)
+                    p_parameters.append(asoid_stim_sem_bout_length)
 
             if analyze_asoid_con_bouts:
-                dlc_con_event_count, dlc_con_average_bout_length, dlc_con_sd_bout_length, dlc_con_sem_bout_length = analyze_ethogram(metadata, 
+                asoid_con_event_count, asoid_con_average_bout_length, asoid_con_sd_bout_length, asoid_con_sem_bout_length = analyze_ethogram(metadata, 
                                                                                                                                      parameters_df,
                                                                                                                                      left_obj=left_obj,
                                                                                                                                      right_obj=right_obj,
-                                                                                                                                     dlc_or_deg="dlc",
+                                                                                                                                     dlc_or_deg="asoid",
                                                                                                                                      control_or_stim="con")
                 if not p_parameters_df_initialized:
-                    p_parameters["Water investigation events DLC"] = dlc_con_event_count
-                    p_parameters["Water investigation average bout length DLC"] = dlc_con_average_bout_length
-                    p_parameters["Water investigation SD bout length DLC"] = dlc_con_sd_bout_length
-                    p_parameters["Water investigation SEM bout length DLC"] = dlc_con_sem_bout_length
+                    p_parameters["Water investigation events Asoid"] = asoid_con_event_count
+                    p_parameters["Water investigation average bout length Asoid"] = asoid_con_average_bout_length
+                    p_parameters["Water investigation SD bout length Asoid"] = asoid_con_sd_bout_length
+                    p_parameters["Water investigation SEM bout length Asoid"] = asoid_con_sem_bout_length
                 elif p_parameters_df_initialized:
-                    p_parameters.append(dlc_con_event_count)
-                    p_parameters.append(dlc_con_average_bout_length)
-                    p_parameters.append(dlc_con_sd_bout_length)
-                    p_parameters.append(dlc_con_sem_bout_length)
+                    p_parameters.append(asoid_con_event_count)
+                    p_parameters.append(asoid_con_average_bout_length)
+                    p_parameters.append(asoid_con_sd_bout_length)
+                    p_parameters.append(asoid_con_sem_bout_length)
                 
         if analyze_movement:
 
