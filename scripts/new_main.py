@@ -28,12 +28,12 @@ project_path = "./datasets/testing"
 # if there is a specific naming convention, code needs to be passed to the get_metadata()
 # basic convention is: "date_camera_mouse_paradigm_paradigm_paradigm"
 # right now, "vol_vs_invol" is an extra option - use None for others!
-exp_meta_code = "vol_vs_invol"
+exp_meta_code = None
 left_obj = "left_dish"
 right_obj = "right_dish"
 
 # do you want to process dlc csv files?
-dlc_analysis = True
+dlc_analysis = False
 if dlc_analysis:
     # the dlc layout contains information about the column names of the bodyparts
     dlc_layout = dlc_petridish_layout_simon
@@ -79,10 +79,10 @@ if dlc_analysis:
     save_parameters = True
 
     # do you want to move the raw dlc csv's from 'new' to 'done' folder?
-    move_raw_csv = True
+    move_raw_csv = False
 
 # do you want to add deg data to existing parameter files?
-add_deg_data = True
+add_deg_data = False
 if add_deg_data:
     # is there a parameter csv initialized (due to previous DLC analysis)?
     parameter_csv_present = True
@@ -95,10 +95,26 @@ if add_deg_data:
     behavior2_index = f"deg_is_investigating_{right_obj}"
 
     # do you want to move the deg_csvs to the 'done' directory?
-    move_deg_csv = True
+    move_deg_csv = False
+
+add_asoid_data = True
+if add_asoid_data:
+    # is there a parameter csv initialized (due to previous DLC analysis)?
+    parameter_csv_present = True
+    
+    # how are the asoid behaviors labelled?
+    asoid_behavior1 = "leftsniffing"
+    asoid_behavior2 = "rightsniffing"
+
+    # how should the column be indexed in the parameter files?
+    behavior1_index = f"asoid_is_investigating_{left_obj}"
+    behavior2_index = f"asoid_is_investigating_{right_obj}"
+
+    # do you want to move the asoid_csvs to the 'done' directory?
+    move_asoid_csv = True
 
 # do you want to do postprocessing?
-run_postprocessing = True
+run_postprocessing = False
 if run_postprocessing:
     # do you want to calculate the total time in % of each behavior?
     analyze_sum_behavior = True
@@ -119,6 +135,10 @@ if run_postprocessing:
         analyze_dlc_stim_bouts = True
         # for dlc control investigation?
         analyze_dlc_con_bouts = True
+        # for asoid?
+        analyze_asoid_stim_bouts = True
+        # for asoid control investigation?
+        analyze_asoid_con_bouts = True
     # do you want to analyze movement behavior? (median speed, distance travelled and immobile time)
     analyze_movement = True
     # should the parameter file be moved in the 'done' directory?
@@ -286,7 +306,7 @@ if add_deg_data:
 
         if parameter_csv_present:
 
-            parameter_df, parameter_df_path = find_parameter_file(deg_file=deg_file,
+            parameter_df, parameter_df_path = find_parameter_file(file=deg_file,
                                                                   metadata_dic=deg_metadata,
                                                                   parameter_paths=parameter_full_list,
                                                                   experiment=exp_meta_code)
@@ -323,6 +343,75 @@ if add_deg_data:
             shutil.move(deg_file, deg_path_done)
     
 # # # # End: Get data from DeepEthogram, append it to the respective parameters files # # # #
+
+
+
+# # # # Start: Get data from Asoid, append it to the respective parameters files # # # #
+
+# define the paths and get the asoid files
+if add_asoid_data:
+    asoid_path = f"{project_path}/raw/asoid_new/*.csv"
+    asoid_path_done = f"{project_path}/raw/asoid_done/"
+    asoid_file_list = glob.glob(asoid_path)
+
+
+    if parameter_csv_present:
+        # get all possible parameter paths
+        parameter_new_path = f"{project_path}/processed/parameters/new/*.csv"
+        parameter_new_list = glob.glob(parameter_new_path)
+
+        parameter_done_path = f"{project_path}/processed/parameters/done/*.csv"
+        parameter_done_list = glob.glob(parameter_done_path)
+        parameter_full_list = parameter_new_list + parameter_done_list
+
+    for asoid_file in tqdm(asoid_file_list):
+        time.sleep(0.2)
+
+        # get the DeepEthogram dataframe and the matching parameter_df
+        asoid_metadata = get_metadata(asoid_file, experiment=exp_meta_code)
+        asoid_df = pd.read_csv(asoid_file)
+
+        if parameter_csv_present:
+
+            parameter_df, parameter_df_path = find_parameter_file(file=asoid_file,
+                                                                  metadata_dic=asoid_metadata,
+                                                                  parameter_paths=parameter_full_list,
+                                                                  experiment=exp_meta_code)
+
+            # append DeepEthogram data to the parameter_df
+            try:
+                parameter_df[behavior1_index] = np.array(asoid_df[asoid_behavior1])
+                parameter_df[behavior2_index] = np.array(asoid_df[asoid_behavior2])
+                # save the new parameter_df to the same file
+                parameter_df.to_csv(parameter_df_path)
+            except:
+                print(f"Size of dataframe: {len(parameter_df)}. Size of A-Soid data: {len(deg_df)}.")
+                add_df = pd.DataFrame({
+                    behavior1_index: np.array(asoid_df[asoid_behavior1]),
+                    behavior2_index: np.array(asoid_df[asoid_behavior2])
+                })
+                concat_parameter_df = pd.concat([parameter_df, add_df], axis=1)
+                concat_parameter_df.to_csv(parameter_df_path)
+        
+        if not parameter_csv_present:
+            
+            print(asoid_metadata)
+
+            parameters = {}
+            parameters[behavior1_index] = np.array(asoid_df[asoid_behavior1])
+            parameters[behavior2_index] = np.array(asoid_df[asoid_behavior2])
+
+            parameters_to_csv(metadata_dic=asoid_metadata,parameters=parameters,path=f"{project_path}/processed/parameters/new/")
+
+
+
+        if move_asoid_csv:
+            # used asoid file goes to the respective 'done' folder
+            shutil.move(asoid_file, asoid_path_done)
+
+# # # # End: Get data from Asoid, append it to the respective parameters files # # # #
+
+
 
 # # # # Start: Take processed (parameter) data, calculate metrics, save metrics of similar paradigm recordings in one csv  # # # #
 if run_postprocessing:
@@ -463,6 +552,44 @@ if run_postprocessing:
                     p_parameters.append(dlc_con_average_bout_length)
                     p_parameters.append(dlc_con_sd_bout_length)
                     p_parameters.append(dlc_con_sem_bout_length)
+
+
+            if analyze_asoid_stim_bouts:
+                asoid_stim_event_count, asoid_stim_average_bout_length, asoid_stim_sd_bout_length, asoid_stim_sem_bout_length = analyze_ethogram(metadata,
+                                                                                                                                         parameters_df,
+                                                                                                                                         left_obj=left_obj,
+                                                                                                                                         right_obj=right_obj,
+                                                                                                                                         dlc_or_deg="dlc", 
+                                                                                                                                         control_or_stim="stim")
+                if not p_parameters_df_initialized:
+                    p_parameters["Stimulus investigation events DLC"] = dlc_stim_event_count
+                    p_parameters["Stimulus investigation average bout length DLC"] = dlc_stim_average_bout_length
+                    p_parameters["Stimulus investigation SD bout length DLC"] = dlc_stim_sd_bout_length
+                    p_parameters["Stimulus investigation SEM bout length DLC"] = dlc_stim_sem_bout_length
+                elif p_parameters_df_initialized:
+                    p_parameters.append(dlc_stim_event_count)
+                    p_parameters.append(dlc_stim_average_bout_length)
+                    p_parameters.append(dlc_stim_sd_bout_length)
+                    p_parameters.append(dlc_stim_sem_bout_length)
+
+            if analyze_asoid_con_bouts:
+                dlc_con_event_count, dlc_con_average_bout_length, dlc_con_sd_bout_length, dlc_con_sem_bout_length = analyze_ethogram(metadata, 
+                                                                                                                                     parameters_df,
+                                                                                                                                     left_obj=left_obj,
+                                                                                                                                     right_obj=right_obj,
+                                                                                                                                     dlc_or_deg="dlc",
+                                                                                                                                     control_or_stim="con")
+                if not p_parameters_df_initialized:
+                    p_parameters["Water investigation events DLC"] = dlc_con_event_count
+                    p_parameters["Water investigation average bout length DLC"] = dlc_con_average_bout_length
+                    p_parameters["Water investigation SD bout length DLC"] = dlc_con_sd_bout_length
+                    p_parameters["Water investigation SEM bout length DLC"] = dlc_con_sem_bout_length
+                elif p_parameters_df_initialized:
+                    p_parameters.append(dlc_con_event_count)
+                    p_parameters.append(dlc_con_average_bout_length)
+                    p_parameters.append(dlc_con_sd_bout_length)
+                    p_parameters.append(dlc_con_sem_bout_length)
+                
         if analyze_movement:
 
             median_speed_val = median_speed(parameters_df)
