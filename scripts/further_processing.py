@@ -61,6 +61,7 @@ def get_paradigm(metadata, parameter_df, left_obj, right_obj):
         urine_stim_asoid = np.zeros(len(parameter_df))
         control_stim_asoid = np.zeros(len(parameter_df))
 
+
     return exp_or_hab, urine_stim, control_stim, urine_stim_deg, control_stim_deg, urine_stim_asoid, control_stim_asoid
     
     

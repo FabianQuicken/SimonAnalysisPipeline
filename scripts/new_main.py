@@ -24,7 +24,7 @@ from figures import eventplot, pieplot, plot_cum_dist, plot_distance_val, prepar
 # # # # Define your experiment here # # # #
 
 # define the project path - head directory of your specific dataset, that should be analyzed similarly
-project_path = "./datasets/testing"
+project_path = "./datasets/testing2"
 # if there is a specific naming convention, code needs to be passed to the get_metadata()
 # basic convention is: "date_camera_mouse_paradigm_paradigm_paradigm"
 # right now, "vol_vs_invol" is an extra option - use None for others!
@@ -91,13 +91,13 @@ if add_deg_data:
     deg_behavior2 = 'rightsniffing'
 
     # how should the column be indexed in the parameter files?
-    behavior1_index = f"deg_is_investigating_{left_obj}"
-    behavior2_index = f"deg_is_investigating_{right_obj}"
+    deg_behavior1_index = f"deg_is_investigating_{left_obj}"
+    deg_behavior2_index = f"deg_is_investigating_{right_obj}"
 
     # do you want to move the deg_csvs to the 'done' directory?
     move_deg_csv = False
 
-add_asoid_data = True
+add_asoid_data = False
 if add_asoid_data:
     # is there a parameter csv initialized (due to previous DLC analysis)?
     parameter_csv_present = True
@@ -107,14 +107,14 @@ if add_asoid_data:
     asoid_behavior2 = "rightsniffing"
 
     # how should the column be indexed in the parameter files?
-    behavior1_index = f"asoid_is_investigating_{left_obj}"
-    behavior2_index = f"asoid_is_investigating_{right_obj}"
+    asoid_behavior1_index = f"asoid_is_investigating_{left_obj}"
+    asoid_behavior2_index = f"asoid_is_investigating_{right_obj}"
 
     # do you want to move the asoid_csvs to the 'done' directory?
     move_asoid_csv = True
 
 # do you want to do postprocessing?
-run_postprocessing = False
+run_postprocessing = True
 if run_postprocessing:
     # do you want to calculate the total time in % of each behavior?
     analyze_sum_behavior = True
@@ -313,15 +313,15 @@ if add_deg_data:
 
             # append DeepEthogram data to the parameter_df
             try:
-                parameter_df[behavior1_index] = np.array(deg_df[deg_behavior1])
-                parameter_df[behavior2_index] = np.array(deg_df[deg_behavior2])
+                parameter_df[deg_behavior1_index] = np.array(deg_df[deg_behavior1])
+                parameter_df[deg_behavior2_index] = np.array(deg_df[deg_behavior2])
                 # save the new parameter_df to the same file
                 parameter_df.to_csv(parameter_df_path)
             except:
                 print(f"Size of dataframe: {len(parameter_df)}. Size of DEG data: {len(deg_df)}.")
                 add_df = pd.DataFrame({
-                    behavior1_index: np.array(deg_df[deg_behavior1]),
-                    behavior2_index: np.array(deg_df[deg_behavior2])
+                    deg_behavior1_index: np.array(deg_df[deg_behavior1]),
+                    deg_behavior2_index: np.array(deg_df[deg_behavior2])
                 })
                 concat_parameter_df = pd.concat([parameter_df, add_df], axis=1)
                 concat_parameter_df.to_csv(parameter_df_path)
@@ -331,8 +331,8 @@ if add_deg_data:
             print(deg_metadata)
 
             parameters = {}
-            parameters[behavior1_index] = np.array(deg_df[deg_behavior1])
-            parameters[behavior2_index] = np.array(deg_df[deg_behavior2])
+            parameters[deg_behavior1_index] = np.array(deg_df[deg_behavior1])
+            parameters[deg_behavior2_index] = np.array(deg_df[deg_behavior2])
 
             parameters_to_csv(metadata_dic=deg_metadata,parameters=parameters,path=f"{project_path}/processed/parameters/new/")
 
@@ -380,15 +380,15 @@ if add_asoid_data:
 
             # append DeepEthogram data to the parameter_df
             try:
-                parameter_df[behavior1_index] = np.array(asoid_df[asoid_behavior1])
-                parameter_df[behavior2_index] = np.array(asoid_df[asoid_behavior2])
+                parameter_df[asoid_behavior1_index] = np.array(asoid_df[asoid_behavior1])
+                parameter_df[asoid_behavior2_index] = np.array(asoid_df[asoid_behavior2])
                 # save the new parameter_df to the same file
                 parameter_df.to_csv(parameter_df_path)
             except:
                 print(f"Size of dataframe: {len(parameter_df)}. Size of A-Soid data: {len(deg_df)}.")
                 add_df = pd.DataFrame({
-                    behavior1_index: np.array(asoid_df[asoid_behavior1]),
-                    behavior2_index: np.array(asoid_df[asoid_behavior2])
+                    asoid_behavior1_index: np.array(asoid_df[asoid_behavior1]),
+                    asoid_behavior2_index: np.array(asoid_df[asoid_behavior2])
                 })
                 concat_parameter_df = pd.concat([parameter_df, add_df], axis=1)
                 concat_parameter_df.to_csv(parameter_df_path)
@@ -398,8 +398,8 @@ if add_asoid_data:
             print(asoid_metadata)
 
             parameters = {}
-            parameters[behavior1_index] = np.array(asoid_df[asoid_behavior1])
-            parameters[behavior2_index] = np.array(asoid_df[asoid_behavior2])
+            parameters[asoid_behavior1_index] = np.array(asoid_df[asoid_behavior1])
+            parameters[asoid_behavior2_index] = np.array(asoid_df[asoid_behavior2])
 
             parameters_to_csv(metadata_dic=asoid_metadata,parameters=parameters,path=f"{project_path}/processed/parameters/new/")
 
