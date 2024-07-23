@@ -248,8 +248,8 @@ if dlc_analysis:
             radius_petridish = np.zeros(len(is_investigating_left))
             for i in range(len(radius_petridish)-1):
                 radius_petridish[i] = factor
-            parameters[f"is_investigating_{left_obj}"] = is_investigating_left
-            parameters[f"is_investigating_{right_obj}"] = is_investigating_right
+            parameters[f"dlc_is_investigating_{left_obj}"] = is_investigating_left
+            parameters[f"dlc_is_investigating_{right_obj}"] = is_investigating_right
             parameters["object_investigation_radius[cm]"] = radius_petridish
         """
         # write parameters into a dic; new calculations need to be appended manually

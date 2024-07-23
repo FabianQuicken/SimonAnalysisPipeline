@@ -10,8 +10,8 @@ def get_paradigm(metadata, parameter_df, left_obj, right_obj):
 
     if "right" in metadata["paradigm"]:
         try:
-            urine_stim = parameter_df[f"is_investigating_{right_obj}"]
-            control_stim = parameter_df[f"is_investigating_{left_obj}"]
+            urine_stim = parameter_df[f"dlc_is_investigating_{right_obj}"]
+            control_stim = parameter_df[f"dlc_is_investigating_{left_obj}"]
         except:
             print("No dlc data available.")
         try:
@@ -27,8 +27,8 @@ def get_paradigm(metadata, parameter_df, left_obj, right_obj):
         
     elif "left" in metadata["paradigm"]:
         try:
-            urine_stim = parameter_df[f"is_investigating_{left_obj}"]
-            control_stim = parameter_df[f"is_investigating_{right_obj}"]
+            urine_stim = parameter_df[f"dlc_is_investigating_{left_obj}"]
+            control_stim = parameter_df[f"dlc_is_investigating_{right_obj}"]
         except:
             print("No dlc data available.")
         try:
