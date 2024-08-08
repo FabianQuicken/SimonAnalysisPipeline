@@ -54,6 +54,14 @@ def get_metadata(csv_file_path, experiment = None):
             parts[6] = parts[6][:-3]
         
         paradigm = parts[3] + "_" + parts[4] + "_" + parts[5] + "_" + parts[6] 
+    
+    if experiment is "sick_vs_healthy":
+
+        date = parts[3]
+        camera = parts[4]
+        mouse = parts[1]
+        paradigm = parts[2] + "_" + parts[5] + "_" + parts[6] + "_" + parts[7] + "_" + parts[8] + "_" + parts[9] + "_" + parts[10] 
+        
 
     return {"date": date,
             "camera": camera,

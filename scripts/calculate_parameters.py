@@ -2,8 +2,9 @@ import numpy as np
 import pandas as pd
 from mathematics import euklidean_distance, punkt_in_viereck
 from likelihood_filter import likelihood_filtering,likelihood_filtering_nans
+from configurations import pixel_per_cm
 
-pixel_per_cm=34.77406
+
 
 def time_spent_sides(df,bodypart=str,edge_left=str, edge_right=str):
     data = df.copy()
@@ -129,12 +130,19 @@ def distance_bodypart_object(df, bodypart=str, object=str):
     bodypart_x = data[bodypart+"_x"]
     bodypart_y = data[bodypart+"_y"]
 
-    print("Filtering for a good object prediction...")
-    data = likelihood_filtering(df=data, 
-                                likelihood_row_name=object+"_likelihood",
-                                filter_val=0.95)
-    object_x = data[object+"_x"]
-    object_y = data[object+"_y"]
+
+    # überspringt, falls vorher schon berechnet und daher keine likelihood vorhanden:
+    try:
+        print("Filtering for a good object prediction...")
+        data = likelihood_filtering(df=data, 
+                                    likelihood_row_name=object+"_likelihood",
+                                    filter_val=0.95)
+    except:
+        print(f"No likelihood row available. Likelihood filtering of {object} skipped.")
+    object_x = data[object+"_x"].dropna()
+    object_y = data[object+"_y"].dropna()
+    bodypart_x = data[bodypart+"_x"]
+    bodypart_y = data[bodypart+"_y"]
 
 
     bodypart_x = np.array(bodypart_x)
@@ -143,6 +151,8 @@ def distance_bodypart_object(df, bodypart=str, object=str):
     object_y = np.array(object_y)
     object_x = object_x[0]
     object_y = object_y[0]
+    print(f"{object} x-coord: {object_x}")
+    print(f"{object} y-coord: {object_y}")
 
 
     distance_values = np.zeros((len(bodypart_x)))
@@ -187,8 +197,8 @@ def distance_bodypart_bodypart(df, bodypart_1=str, bodypart_2=str):
 
 def investigation_time(distance_values, factor = 1):
     distance_values = distance_values.copy()
-    pixel_per_cm = 34.77406
     radius_threshold = factor * pixel_per_cm
+    print(f"Investigation is True if nose is within {radius_threshold} pixels to the dish center.")
     is_investigating = np.zeros((len(distance_values)))
     for i in range(len(distance_values)-1):
         if distance_values[i] < radius_threshold:
@@ -208,7 +218,7 @@ def immobile_time(speed_values, immobile_threshold = 0.1):
             is_immobile[i] = np.nan
     return is_immobile
 
-def calc_interior_zone_polygon(df, bodypart=str):
+def calc_interior_zone_polygon(df, bodypart=str, corners=list):
     "Normally, the nose should be used because it indicates the orientation of the mouse best."
     data = df.copy()
     print(f"\nGet time spent of {bodypart} at cage edges...")
@@ -219,19 +229,19 @@ def calc_interior_zone_polygon(df, bodypart=str):
     bodypart_y = data[bodypart+"_y"]
 
     print("Filtering for good corner prediction...")
-    corners = ["topleft", "topright", "bottomleft", "bottomright"]
+    
     for corner in corners:
         data = likelihood_filtering(df=data, 
                                     likelihood_row_name=f"{corner}_likelihood",
                                     filter_val=0.99)
-    topleft_x = data["topleft_x"]
-    topleft_y = data["topleft_y"]
-    topright_x = data["topright_x"]
-    topright_y = data["topright_y"]
-    bottomleft_x = data["bottomleft_x"]
-    bottomleft_y = data["bottomleft_y"]
-    bottomright_x = data["bottomright_x"]
-    bottomright_y = data["bottomright_y"]
+    topleft_x = data[f"{corners[0]}_x"]
+    topleft_y = data[f"{corners[0]}_y"]
+    topright_x = data[f"{corners[1]}_x"]
+    topright_y = data[f"{corners[1]}_y"]
+    bottomleft_x = data[f"{corners[2]}_x"]
+    bottomleft_y = data[f"{corners[2]}_y"]
+    bottomright_x = data[f"{corners[3]}_x"]
+    bottomright_y = data[f"{corners[3]}_y"]
 
     bodypart_x = np.array(bodypart_x)
     bodypart_y = np.array(bodypart_y)
