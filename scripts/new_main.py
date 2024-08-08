@@ -31,7 +31,7 @@ project_path = "./datasets/FS_petridishes_sick_healthy"
 # basic convention is: "date_camera_mouse_paradigm_paradigm_paradigm"
 # right now, "vol_vs_invol" is an extra option - use None for others!
 # further extra option: "sick_vs_healthy"
-exp_meta_code = None
+exp_meta_code = "sick_vs_healthy"
 
 # how are your objects named?
 left_obj = "left_dish"

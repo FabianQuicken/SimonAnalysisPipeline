@@ -27,6 +27,8 @@ def get_metadata(csv_file_path, experiment = None):
     camera = parts [1]
     mouse = parts [2]
 
+
+
     if experiment is None:
 
         if "DLC" in parts[5]:
@@ -48,20 +50,25 @@ def get_metadata(csv_file_path, experiment = None):
             else:
                 paradigm = parts[1] + "_" + parts[4]
     
-    if experiment is "vol_vs_invol":
+    if experiment == "vol_vs_invol":
 
         if "DLC" in parts[6]:
             parts[6] = parts[6][:-3]
         
         paradigm = parts[3] + "_" + parts[4] + "_" + parts[5] + "_" + parts[6] 
     
-    if experiment is "sick_vs_healthy":
-
-        date = parts[3]
-        camera = parts[4]
-        mouse = parts[1]
-        paradigm = parts[2] + "_" + parts[5] + "_" + parts[6] + "_" + parts[7] + "_" + parts[8] + "_" + parts[9] + "_" + parts[10] 
-        
+    if experiment == "sick_vs_healthy":
+        # da ich frizis paradigm etwas umschreibe, brauche ich hier 2 conditions
+        if parts[0].lower() == 'frizi':
+            date = parts[3]
+            camera = parts[4]
+            mouse = parts[1]
+            paradigm = parts[2] + "_" + parts[5] + "_" + parts[6] + "_" + parts[7] + "_" + parts[8] + "_" + parts[9] + "_" + parts[10] 
+        else:
+            date = parts[0]
+            camera = parts[1]
+            mouse = parts[2]
+            paradigm = parts[3] + "_" + parts[4] + "_" + parts[5] + "_" + parts[6] + "_" + parts[7] + "_" + parts[8] + "_" + parts[9]
 
     return {"date": date,
             "camera": camera,
