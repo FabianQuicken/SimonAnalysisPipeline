@@ -152,15 +152,14 @@ def prepare_data_line_plot(file_list, right_obj, left_obj, sort_for_mouse = Fals
     dates = []
 
     for file in file_list:
-
+        print(file)
         metadata = get_metadata(file)
         if sort_for_mouse:
             if paradigm in metadata["paradigm"].lower() and metadata["mouse"] == mouse:
-                print(metadata["date"])
                 df = pd.read_csv(file)
                 df_copy = df.copy()
                 data_points = []
-
+                print(df_copy['deg_is_investigating_right_dish'])
                 if "right" in metadata["paradigm"]:
                     urine_stim = df_copy[f"{dlc_or_deg}is_investigating_{right_obj}"]
                 elif "left" in metadata["paradigm"]:
@@ -170,7 +169,6 @@ def prepare_data_line_plot(file_list, right_obj, left_obj, sort_for_mouse = Fals
                 dates.append(metadata["date"])
 
                 urine_stim = np.array(urine_stim)
-                print(np.nansum(urine_stim))
                 total_length = len(urine_stim)
                 part_size = total_length // 10
 

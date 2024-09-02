@@ -75,3 +75,16 @@ dlc_petridish_layout_frizi = ("leftear_x", "leftear_y", "leftear_likelihood",
                         "cagebottomleft_x", "cagebottomleft_y", "cagebottomleft_likelihood",
                         "cagebottomright_x", "cagebottomright_y", "cagebottomright_likelihood"
                         )
+
+dlc_new_setup = ("nose_x", "nose_y", "nose_likelihood",
+                        "head_x", "head_y", "head_likelihood",
+                        "spine1_x", "spine1_y", "spine1_likelihood",
+                        "spine2_x", "spine2_y", "spine2_likelihood",
+                        "centroid_x", "centroid_y", "centroid_likelihood",
+                        "spine3_x", "spine3_y", "spine3_likelihood",
+                        "spine4_x", "spine4_y", "spine4_likelihood",
+                        "tail1_x", "tail1_y", "tail1_likelihood",
+                        "tail2_x", "tail2_y", "tail2_likelihood",
+                        "tail3_x", "tail3_y", "tail3_likelihood",
+                        "snicket_x", "snicket_y", "snicket_likelihood"
+                        )

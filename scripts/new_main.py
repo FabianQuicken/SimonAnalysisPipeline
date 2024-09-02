@@ -14,7 +14,7 @@ from save_to_csv import metadata_bodyparts_to_csv, parameters_to_csv, ini_proces
 from calculate_parameters import distance_travelled, calculate_speed, distance_bodypart_object,time_spent_sides,investigation_time,immobile_time, calc_interior_zone_polygon, calc_edge_time
 from further_processing import percent_of_total_inv_time, disc_index, total_inv_time, median_speed, full_distance, full_immobile_time, analyze_ethogram, get_behavior_sum, total_cage_edge_time
 from get_parameters import find_parameter_file
-from configurations import dlc_petridish_layout_fabi, dlc_petridish_layout_simon, dlc_mighty_snicket_layout_simon,dlc_petridish_layout_frizi
+from configurations import dlc_petridish_layout_fabi, dlc_petridish_layout_simon, dlc_mighty_snicket_layout_simon,dlc_petridish_layout_frizi, dlc_new_setup
 from split_exp_hab import split_csv, split_csv_chatgpt
 from figures import eventplot, pieplot, plot_cum_dist, plot_distance_val, prepare_data_line_plot, plot_multiple_line_plots, plot_multiple_line_plots_chatgpt
 from calculate_dish_center import calc_coordinate_center, get_high_likelihood_dish_coordinates, add_dish_center_to_bodypart_df
@@ -25,13 +25,14 @@ from cut_frizi_df_to_experiment_length import find_first_frame_with_mouse, cut_b
 # # # # Define your experiment here # # # #
 
 # define the project path - head directory of your specific dataset, that should be analyzed similarly
-project_path = "./datasets/FS_petridishes_sick_healthy"
+project_path = "./datasets/SH_petridishes_female_urine"
+project_path = "D:\Eventplots\Analysis for PP"
 
 # if there is a specific naming convention, code needs to be passed to the get_metadata()
 # basic convention is: "date_camera_mouse_paradigm_paradigm_paradigm"
 # right now, "vol_vs_invol" is an extra option - use None for others!
 # further extra option: "sick_vs_healthy"
-exp_meta_code = "sick_vs_healthy"
+exp_meta_code = None
 
 # how are your objects named?
 left_obj = "left_dish"
@@ -46,10 +47,11 @@ if dlc_analysis:
     # # # Important # # # 
 
     # the dlc layout contains information about the column names of the bodyparts
-    dlc_layout = dlc_petridish_layout_frizi
+    dlc_layout = dlc_new_setup
     
 
     # define the bodyparts you want to extract out of the df for further calculations
+    """
     used_bodyparts = ["snout",
                       "centroid",
                       "leftpetrileft",
@@ -64,9 +66,21 @@ if dlc_analysis:
                       "cagetopright",
                       "cagebottomleft",
                       "cagebottomright"]
+    """
+    used_bodyparts = ["nose",
+                      "head",
+                      "spine1",
+                      "spine2",
+                      "centroid",
+                      "spine3",
+                      "spine4",
+                      "tail1",
+                      "tail2",
+                      "tail3",
+                      "snicket"]
     
     # if you turn this on, the code will find the first frame with a mouse predicted
-    cut_df_to_mouse_presence = True
+    cut_df_to_mouse_presence = False
     # frizis experiments take 10 minutes after putting the mouse in the cage
     # she has 20 fps, therefore the experiment ends after 12.000 datapoints
     # if set to None, the data will be cut from mouse presence to recording end
@@ -75,10 +89,12 @@ if dlc_analysis:
     label_to_search_for = "centroid"
 
     # do you need to calculate the dish center because you labelled four dish edges? 
-    calc_dish_center = True
+    calc_dish_center = False
 
 
     calc_distance_and_speed = True
+    # what fps does the video have?
+    fps = 30
     # what bodypart do you want to use for distance and speed calculation?
     distance_bodypart = "centroid"
 
@@ -86,7 +102,7 @@ if dlc_analysis:
     # below what speed threshold [km/h] the animal is defined immobile?
     immobile_threshold = 0.1
 
-    calc_cage_edge_time = True
+    calc_cage_edge_time = False
     # what bodypart should be checked for being close at the edges?
     edge_bodypart = "snout"
     # how are the cage corners named? 
@@ -94,19 +110,19 @@ if dlc_analysis:
     corners = ["cagetopleft", "cagetopright", "cagebottomleft", "cagebottomright"]
 
 
-    calc_dist_left_object = True
-    calc_dist_right_object = True
+    calc_dist_left_object = False
+    calc_dist_right_object = False
     # what bodypart and object are used for distance calculation?
     obj_dist_bodypart = "snout"
     left_obj = left_obj
     right_obj = right_obj
     # do you want to calculate investigation behavior based on the distance?
-    calc_inv_time = True
+    calc_inv_time = False
     # What is the distance in cm, from where it should be counted as investigation?
     # e.g. frizis petridishes have a 6 cm diameter, therefore a radius of 3 cm should be chosen
     investigation_distance_thresh = 3 # this will be multiplied with pixel_per_cm from configurations.py
 
-    calc_side_pref = True
+    calc_side_pref = False
     # give the bodypart that is checked for sidepref
     side_pref_bodypart = "centroid"
     # give two coordinates that define the edges of the arena
@@ -188,7 +204,7 @@ if run_postprocessing:
 make_plots = False
 
 make_line_plots_one_mouse = False
-make_line_plots_all_mice = False
+make_line_plots_all_mice = True
 make_event_plots = False
 make_grouped_eventplots = True
 
@@ -292,7 +308,7 @@ if dlc_analysis:
         # getting all the parameters from the DLC Data
         if calc_distance_and_speed:
             distance = distance_travelled(df = new_df, bodypart = distance_bodypart)
-            speed = calculate_speed(distance)
+            speed = calculate_speed(distance, fps=fps)
             parameters["distance_travelled_center_in_m"] = distance
             parameters["speed_in_km/h"] = speed
 
@@ -839,11 +855,11 @@ if make_plots:
     if make_line_plots_all_mice:
     
         # like this i could overlay multpile plots #
-        mice = ["39623","39624","39625","39630","39631","39632", "39788", "39789", "39790", "39806"]
+        mice = ["1","2","95","104","105","117"]
         overlay_data = []
-        paradigm = "habituation"
+        paradigm = "experiment"
         # what network predictions to use for analysis? enter "deg" or "dlc"
-        network = "dlc"
+        network = "deg"
         if network == "deg":
             dlc_or_deg = "deg_"
         elif network == "dlc":
@@ -859,8 +875,9 @@ if make_plots:
                                         mouse = mouse,
                                         dlc_or_deg=dlc_or_deg)
             overlay_data.append(data)
-        
+
         fig, ax = plt.subplots(figsize=(10, 8), facecolor='black')
+        #ax.set_ylim([0,2000])
         for data in overlay_data:
 
             plot_multiple_line_plots_chatgpt(ax, data, paradigm=paradigm, mouse="n")

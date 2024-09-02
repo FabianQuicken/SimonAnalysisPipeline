@@ -3,24 +3,30 @@ import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 import pandas as pd
 
-project_path = "./datasets/testing"
-file_path = "/processed/parameters/done/240220_top_1_V1_Experiment_Urinright_processed.csv"
-df = pd.read_csv(project_path+file_path)
+#project_path = "./datasets/testing"
+project_path = "D:/Eventplots/speedometer"
+#file_path = "/processed/parameters/done/240220_top_1_V1_Experiment_Urinright_processed.csv"
+file_path = "D:/Eventplots/speedometer/240220_top_1_V1_Experiment_Urinright_processed.csv"
+df = pd.read_csv(file_path)
+
 speed_values = df["speed_in_km/h"]
 speed_values = np.array(speed_values).astype(float)
 speed_values = np.nan_to_num(speed_values, nan=0.0)
 speed_values = speed_values * 1000
 speed_values = speed_values.round()
+
+speed_values = speed_values / 11.1111
+
 speed_values = speed_values.astype(int)
 
-skip_frames = 4
+skip_frames = 1
 speed_values = speed_values[::skip_frames]
 print(min(speed_values))
 
 print(max(speed_values))
 for i in range(len(speed_values)):
-    if speed_values[i] > 4000:
-        speed_values[i] = 4000
+    if speed_values[i] > 360:
+        speed_values[i] = 360
 
 # Normalize speed values to range 0 to 100
 min_speed = np.min(speed_values)
@@ -58,7 +64,7 @@ for i, angle in enumerate(tick_angles):
 
 # Add transparent background for the area between 0 and 100
 start_angle = np.pi / 2  # Start from the top (90 degrees)
-end_speed = 100  # Speed value at the end of the shaded area
+end_speed = 18  # Speed value at the end of the shaded area
 end_angle = start_angle - (end_speed / max_speed * 2 * np.pi)  # Calculate end angle based on the speed value
 theta = np.linspace(start_angle, end_angle, 100)
 x_fill = np.concatenate([[0], np.cos(theta), [0]])
@@ -108,7 +114,8 @@ def update(frame):
 ani = animation.FuncAnimation(fig, update, frames=normalized_speeds, init_func=init, blit=True, repeat=False)
 
 # Save the animation
-ani.save(f'{project_path}/figures/speedometer_animation.mp4', writer='ffmpeg', fps=60/skip_frames)
+#ani.save(f'{project_path}/figures/speedometer_animation.mp4', writer='ffmpeg', fps=60/skip_frames)
+ani.save(f'{project_path}/speedometer_animation.mp4', writer='ffmpeg', fps=30/skip_frames)
 
 #plt.show()
 
