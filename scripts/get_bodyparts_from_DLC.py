@@ -10,8 +10,7 @@ import pandas as pd
 
 def get_df(csv_file_path):
     """
-    This func returns the first row from a DLC output csv as a 
-    pandas dataframe. The first row contains the network name.
+   
     """
     df = pd.read_csv(csv_file_path)
     return df
