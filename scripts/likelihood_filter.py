@@ -13,7 +13,7 @@ import numpy as np
 
 # use this most of the time:
 
-def likelihood_filtering_nans(df, likelihood_row_name=str, filter_val=0.95):
+def likelihood_filtering_nans(df, likelihood_row_name=str, filter_val=0.7):
     """
     DeepLabCut provides a likelihood for the prediction of 
     each bodypart in each frame to be correct. Filtering predictions
@@ -28,7 +28,7 @@ def likelihood_filtering_nans(df, likelihood_row_name=str, filter_val=0.95):
 
 # use this only if the data doesn't go to a dataframe: 
 
-def likelihood_filtering(df, likelihood_row_name=str, filter_val = 0.95):
+def likelihood_filtering(df, likelihood_row_name=str, filter_val = 0.7):
     """
     DeepLabCut provides a likelihood for the prediction of 
     each bodypart in each frame to be correct. Filtering predictions

@@ -1,9 +1,10 @@
 import numpy as np
 import pandas as pd
-from mathematics import euklidean_distance
+from mathematics import euklidean_distance, punkt_in_viereck
 from likelihood_filter import likelihood_filtering,likelihood_filtering_nans
+from configurations import pixel_per_cm
 
-pixel_per_cm=34.77406
+
 
 def time_spent_sides(df,bodypart=str,edge_left=str, edge_right=str):
     data = df.copy()
@@ -129,12 +130,19 @@ def distance_bodypart_object(df, bodypart=str, object=str):
     bodypart_x = data[bodypart+"_x"]
     bodypart_y = data[bodypart+"_y"]
 
-    print("Filtering for a good object prediction...")
-    data = likelihood_filtering(df=data, 
-                                likelihood_row_name=object+"_likelihood",
-                                filter_val=0.95)
-    object_x = data[object+"_x"]
-    object_y = data[object+"_y"]
+
+    # überspringt, falls vorher schon berechnet und daher keine likelihood vorhanden:
+    try:
+        print("Filtering for a good object prediction...")
+        data = likelihood_filtering(df=data, 
+                                    likelihood_row_name=object+"_likelihood",
+                                    filter_val=0.95)
+    except:
+        print(f"No likelihood row available. Likelihood filtering of {object} skipped.")
+    object_x = data[object+"_x"].dropna()
+    object_y = data[object+"_y"].dropna()
+    bodypart_x = data[bodypart+"_x"]
+    bodypart_y = data[bodypart+"_y"]
 
 
     bodypart_x = np.array(bodypart_x)
@@ -143,6 +151,8 @@ def distance_bodypart_object(df, bodypart=str, object=str):
     object_y = np.array(object_y)
     object_x = object_x[0]
     object_y = object_y[0]
+    print(f"{object} x-coord: {object_x}")
+    print(f"{object} y-coord: {object_y}")
 
 
     distance_values = np.zeros((len(bodypart_x)))
@@ -187,8 +197,8 @@ def distance_bodypart_bodypart(df, bodypart_1=str, bodypart_2=str):
 
 def investigation_time(distance_values, factor = 1):
     distance_values = distance_values.copy()
-    pixel_per_cm = 34.77406
     radius_threshold = factor * pixel_per_cm
+    print(f"Investigation is True if nose is within {radius_threshold} pixels to the dish center.")
     is_investigating = np.zeros((len(distance_values)))
     for i in range(len(distance_values)-1):
         if distance_values[i] < radius_threshold:
@@ -207,6 +217,75 @@ def immobile_time(speed_values, immobile_threshold = 0.1):
         elif np.isnan(speed_values[i]):
             is_immobile[i] = np.nan
     return is_immobile
+
+def calc_interior_zone_polygon(df, bodypart=str, corners=list):
+    "Normally, the nose should be used because it indicates the orientation of the mouse best."
+    data = df.copy()
+    print(f"\nGet time spent of {bodypart} at cage edges...")
+    print(f"Filtering {bodypart} for position calculation...")
+    data = likelihood_filtering_nans(df=data, 
+                                likelihood_row_name=bodypart+"_likelihood")
+    bodypart_x = data[bodypart+"_x"]
+    bodypart_y = data[bodypart+"_y"]
+
+    print("Filtering for good corner prediction...")
+    
+    for corner in corners:
+        data = likelihood_filtering(df=data, 
+                                    likelihood_row_name=f"{corner}_likelihood",
+                                    filter_val=0.99)
+    topleft_x = data[f"{corners[0]}_x"]
+    topleft_y = data[f"{corners[0]}_y"]
+    topright_x = data[f"{corners[1]}_x"]
+    topright_y = data[f"{corners[1]}_y"]
+    bottomleft_x = data[f"{corners[2]}_x"]
+    bottomleft_y = data[f"{corners[2]}_y"]
+    bottomright_x = data[f"{corners[3]}_x"]
+    bottomright_y = data[f"{corners[3]}_y"]
+
+    bodypart_x = np.array(bodypart_x)
+    bodypart_y = np.array(bodypart_y)
+    topleft_x = np.array(topleft_x)[0]
+    topleft_y = np.array(topleft_y)[0]
+    topright_x = np.array(topright_x)[0]
+    topright_y = np.array(topright_y)[0]
+    bottomleft_x = np.array(bottomleft_x)[0]
+    bottomleft_y = np.array(bottomleft_y)[0]
+    bottomright_x = np.array(bottomright_x)[0]
+    bottomright_y = np.array(bottomright_y)[0]
+
+    #original_corners = [(topleft_x, topleft_y), (topright_x, topright_y), (bottomleft_x,bottomleft_y), (bottomright_x, bottomright_y)]
+    scaling_factor = 0.1
+
+    topleft_x += (topright_x - topleft_x) * scaling_factor
+    topleft_y += (bottomleft_y - topleft_y) * scaling_factor
+    topright_x -= (topright_x - topleft_x) * scaling_factor
+    topright_y += (bottomright_y - topright_y) * scaling_factor
+    bottomleft_x += (bottomright_x - bottomleft_x) * scaling_factor
+    bottomleft_y -= (bottomleft_y - topleft_y) * scaling_factor
+    bottomright_x -= (bottomright_x - bottomleft_x) * scaling_factor
+    bottomright_y -= (bottomright_y - topright_y) * scaling_factor
+
+    scaled_corners = [(bottomleft_x,bottomleft_y), (bottomright_x, bottomright_y), (topright_x, topright_y), (topleft_x, topleft_y)]
+
+    return (bodypart_x, bodypart_y), scaled_corners
+
+def calc_edge_time(nose_coords=tuple, scaled_corner_coords=list):
+    """
+    nose_coords should be a tuple of two list containing x and y coordinates, respectively.
+    scaled_orner_coords should be a list containing tuples of the scaled corner coordinates
+    """
+    nose_x = nose_coords[0]
+    nose_y = nose_coords[1]
+    edge_time = np.zeros(len(nose_x))
+
+    for i in range(len(nose_x)):
+        inside = punkt_in_viereck(punkt=(nose_x[i], nose_y[i]), eckpunkte=scaled_corner_coords)
+        if not inside:
+            edge_time[i] = 1
+    return edge_time
+
+
 
 
 

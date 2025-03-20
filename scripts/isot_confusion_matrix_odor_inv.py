@@ -8,7 +8,7 @@ from matplotlib.colors import LinearSegmentedColormap
 
 # Paths to the prediction and ground truth CSV files
 project_path = "./isot/Odor Investigation/Evaluation"
-path_asoid = f"{project_path}/asoid_predictions/*.csv"
+path_asoid = f"{project_path}/dist_thresh/bodyparts_interpolated_60_opt/*.csv"
 path_gt = f"{project_path}/ground_truth/*.csv"
 
 # Collect file paths
@@ -28,10 +28,18 @@ for asoid_file, gt_file in zip(file_list_asoid, file_list_gt):
     df_gt = pd.read_csv(gt_file)
 
     # Extract the arrays
-    predictions_right = np.nan_to_num(df_asoid["rightsniffing"].to_numpy())
+    predictions_right = np.nan_to_num(df_asoid["right investigation"].to_numpy())
     ground_truth_right = df_gt["rightsniffing"].to_numpy()
-    predictions_left = np.nan_to_num(df_asoid["leftsniffing"].to_numpy())
+    predictions_left = np.nan_to_num(df_asoid["left investigation"].to_numpy())
     ground_truth_left = df_gt["leftsniffing"].to_numpy()
+
+    for i in range(len(predictions_right)):
+        if predictions_right[i] == 1:
+            predictions_left[i] = 0
+        if predictions_left[i] == 1:
+            predictions_right[i] = 0
+
+
 
     # Append the data to the lists
     all_predictions_right.extend(predictions_right)
@@ -73,7 +81,7 @@ ax.set_facecolor('black')
 # Set label colors
 ax.set_xlabel('predicted', color='white')
 ax.set_ylabel('true', color='white')
-ax.set_title('A-Soid confusion matrix', color='white')
+ax.set_title('DeepLabCut (interpolated) confusion matrix', color='white')
 
 # Set tick colors
 ax.tick_params(axis='x', colors='white')
@@ -89,5 +97,5 @@ cbar.ax.yaxis.set_tick_params(color='white')
 plt.setp(cbar.ax.yaxis.get_majorticklabels(), color='white')
 cbar.set_label(label="", color='white')
 
-plt.savefig(f"{project_path}/asoid_confusionmatrix.svg", format='svg', facecolor="black")
+plt.savefig(f"{project_path}/deeplabcut_interpolated_confusionmatrix.svg", format='svg', facecolor="black")
 plt.show()

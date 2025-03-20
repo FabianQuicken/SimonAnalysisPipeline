@@ -6,7 +6,7 @@ def metadata_bodyparts_to_csv(metadata_dic,bodyparts_df,path=str):
     mouse = metadata_dic["mouse"]
     paradigm = metadata_dic["paradigm"]
     camera = metadata_dic["camera"]
-    bodyparts_df.to_csv(path+date+"_"+camera+mouse+"_"+paradigm+"_bodyparts.csv")
+    bodyparts_df.to_csv(path+date+"_"+camera+"_"+mouse+"_"+paradigm+"_bodyparts.csv")
 
 
 def parameters_to_csv(metadata_dic, parameters=dict, path=str):

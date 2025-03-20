@@ -1,5 +1,7 @@
-
-nan function - wenn verhalten an der länge des videos bemessen wird, müssen nans rausgerechnet werden !!! 
+ 
+event counter
+event bout length
+summe behavior (in % experiment länge)
 
 
 weitere behavior parameter functions

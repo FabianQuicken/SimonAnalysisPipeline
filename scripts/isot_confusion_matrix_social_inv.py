@@ -114,7 +114,7 @@ ax.set_facecolor('black')
 # Set label colors
 ax.set_xlabel('predicted', color='white')
 ax.set_ylabel('true', color='white')
-ax.set_title('DeepLabCut confusion matrix', color='white')
+ax.set_title('DeepLabCut (interpolated) confusion matrix', color='white')
 
 # Set tick colors
 ax.tick_params(axis='x', colors='white')
